@@ -752,58 +752,49 @@
 
         // Update player cards with current game state
         function updatePlayerCards() {
-            try {
-                console.log("Updating player cards");
-                
-                const playerCards = document.querySelectorAll('.player-card');
-                
-                if (!playerCards || playerCards.length === 0) {
-                    console.error("No player cards found to update!");
-                    return;
-                }
-                
-                console.log(`Found ${playerCards.length} player cards to update`);
-                
-                // Log current player state for debugging
-                gameState.players.forEach((player, idx) => {
-                    console.log(`Player ${idx + 1}: Score=${player.score}, ChargedTokens=${player.chargedTokens}`);
-                });
-                
-                playerCards.forEach((card, index) => {
-                    try {
-                        // Update active class
-                        if (index === gameState.currentPlayer && !gameState.gameOver) {
-                            card.classList.add('active');
-                        } else {
-                            card.classList.remove('active');
-                        }
-                        
-                        // Update values
-                        const scoreValue = card.querySelector('.stat-value:first-child');
-                        const chargedValue = card.querySelector('.stat-value:last-child');
-                        
-                        if (scoreValue) {
-                            scoreValue.textContent = gameState.players[index].score;
-                        }
-                        
-                        if (chargedValue) {
-                            chargedValue.textContent = gameState.players[index].chargedTokens;
-                        }
-                    } catch (err) {
-                        console.error(`Error updating player card ${index}:`, err);
-                    }
-                });
-                
-                // Update current player display
-                const currentPlayerElement = document.getElementById('currentPlayer');
-                if (currentPlayerElement) {
-                    currentPlayerElement.textContent = gameState.players[gameState.currentPlayer].name;
-                }
-                
-                console.log("Player cards updated successfully");
-            } catch (error) {
-                console.error("Error updating player cards:", error);
+            console.log("[DEBUG] Updating player cards");
+            console.log("[DEBUG] Player states before update - P1:", 
+                {score: gameState.players[0].score, charged: gameState.players[0].chargedTokens},
+                "P2:", 
+                {score: gameState.players[1].score, charged: gameState.players[1].chargedTokens}
+            );
+            
+            const playerCardsContainer = document.querySelector('.player-cards');
+            
+            if (!playerCardsContainer) {
+                console.error("[DEBUG] Player cards container not found!");
+                return;
             }
+            
+            playerCardsContainer.innerHTML = '';
+            
+            gameState.players.forEach((player, index) => {
+                const playerCard = document.createElement('div');
+                playerCard.className = `player-card player${index + 1}`;
+                if (index === gameState.currentPlayer) {
+                    playerCard.classList.add('active');
+                }
+                
+                playerCard.innerHTML = `
+                    <div class="turn-indicator"></div>
+                    <h2 class="player-name">${player.name}</h2>
+                    <div class="player-stats">
+                        <div class="stat">
+                            <div class="stat-value">${player.score}</div>
+                            <div class="stat-label">Score</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${player.chargedTokens}</div>
+                            <div class="stat-label">Charged</div>
+                        </div>
+                    </div>
+                `;
+                
+                playerCardsContainer.appendChild(playerCard);
+                console.log(`[DEBUG] Updated card for Player ${index + 1} - Score: ${player.score}, Charged: ${player.chargedTokens}`);
+            });
+            
+            console.log("[DEBUG] Player cards update complete");
         }
 
         // Set the current selection mode
@@ -1005,23 +996,24 @@
 
         // End the current turn
         function endTurn() {
-            console.log("End turn requested");
+            console.log("[DEBUG] End turn requested");
+            console.log("[DEBUG] Current charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
             
             if (!gameReadyToRender) {
-                console.log("Game not ready for turn end");
+                console.log("[DEBUG] Game not ready for turn end");
                 updateGameStatus("Game still initializing...");
                 return;
             }
             
             if (gameState.turnPhase !== 'selecting' || gameState.gameOver) {
-                console.log("Cannot end turn: incorrect phase or game over");
+                console.log("[DEBUG] Cannot end turn: phase =", gameState.turnPhase, "gameOver =", gameState.gameOver);
                 updateGameStatus(gameState.gameOver ? "Game is over!" : "Cannot end turn during animations");
                 return;
             }
             
             // Verify placed an energy token
             if (!gameState.placedEnergyToken) {
-                console.log("No energy token placed");
+                console.log("[DEBUG] No energy token placed");
                 updateGameStatus("You must place one energy core!", true);
                 setTimeout(() => {
                     updateGameStatus("Game in progress...");
@@ -1031,8 +1023,11 @@
             
             // Verify player has enough charged tokens
             const chargedCount = gameState.selectedCells.filter(cell => cell.type === 'charged').length;
+            console.log("[DEBUG] Attempting to place", chargedCount, "charged cores");
+            console.log("[DEBUG] Player", gameState.currentPlayer + 1, "has", gameState.players[gameState.currentPlayer].chargedTokens, "charged cores available");
+            
             if (chargedCount > gameState.players[gameState.currentPlayer].chargedTokens) {
-                console.log("Not enough charged tokens");
+                console.log("[DEBUG] Not enough charged tokens");
                 updateGameStatus("Not enough charged cores!", true);
                 setTimeout(() => {
                     updateGameStatus("Game in progress...");
@@ -1043,7 +1038,7 @@
             // Verify not exceeding max selections
             const maxSelections = 1 + gameState.players[gameState.currentPlayer].chargedTokens;
             if (gameState.selectedCells.length > maxSelections) {
-                console.log(`Too many selections: ${gameState.selectedCells.length} > ${maxSelections}`);
+                console.log(`[DEBUG] Too many selections: ${gameState.selectedCells.length} > ${maxSelections}`);
                 updateGameStatus(`Cannot place more than ${maxSelections} cores in one turn!`, true);
                 setTimeout(() => {
                     updateGameStatus("Game in progress...");
@@ -1054,18 +1049,17 @@
             try {
                 // Change phase to animation
                 gameState.turnPhase = 'animation';
-                console.log("Turn phase changed to animation");
+                console.log("[DEBUG] Turn phase changed to animation");
                 updateGameStatus("Processing turn...");
                 
                 // Modify player's charged core count BEFORE placing tokens
                 if (chargedCount > 0) {
-                    console.log(`Player ${gameState.currentPlayer + 1} has ${gameState.players[gameState.currentPlayer].chargedTokens} charged cores before placement`);
+                    const oldCount = gameState.players[gameState.currentPlayer].chargedTokens;
                     
                     // Decrease player's charged core count
                     gameState.players[gameState.currentPlayer].chargedTokens -= chargedCount;
                     
-                    console.log(`Player ${gameState.currentPlayer + 1} used ${chargedCount} charged cores`);
-                    console.log(`Player ${gameState.currentPlayer + 1} now has ${gameState.players[gameState.currentPlayer].chargedTokens} charged cores`);
+                    console.log(`[DEBUG] Player ${gameState.currentPlayer + 1} charged cores: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedTokens} (-${chargedCount})`);
                     
                     // Update player cards immediately to reflect the change
                     updatePlayerCards();
@@ -1073,13 +1067,14 @@
                 
                 // Place tokens on the grid
                 placeTokens();
-                console.log("Tokens placed on grid");
+                console.log("[DEBUG] Tokens placed on grid");
+                console.log("[DEBUG] Current charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
                 
                 // Reset energy token flag for next turn
                 gameState.placedEnergyToken = false;
                 
                 // Check for fusions and eliminations
-                console.log("Scheduling core interactions processing");
+                console.log("[DEBUG] Scheduling core interactions processing");
                 setTimeout(() => {
                     processCoreInteractions();
                 }, 600);
@@ -1520,16 +1515,17 @@
         function processEliminations(eliminations) {
             try {
                 if (!eliminations || eliminations.length === 0) {
-                    // No eliminations, finish turn
-                    console.log("No eliminations to process");
+                    console.log("[DEBUG] No eliminations to process");
                     finishTurn();
                     return;
                 }
                 
-                console.log(`Processing ${eliminations.length} eliminations`);
+                console.log(`[DEBUG] Processing ${eliminations.length} eliminations`);
+                console.log("[DEBUG] Current charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
                 
                 // Animate eliminations
                 eliminations.forEach(elim => {
+                    console.log(`[DEBUG] Processing elimination at (${elim.x}, ${elim.y}), token: ${elim.token}, player: ${elim.player}`);
                     animations.push({
                         type: 'elimination',
                         target: { x: elim.x, y: elim.y },
@@ -1559,29 +1555,31 @@
                     }
                     eliminationsByPlayer[elim.player]++;
                     
+                    console.log(`[DEBUG] Elimination: Player ${elim.player}'s ${elim.tokenType} core (value: ${value})`);
+                    
                     // Remove token from the grid
                     gameState.grid[elim.y][elim.x].token = null;
                     gameState.grid[elim.y][elim.x].value = null;
                 });
                 
+                console.log("[DEBUG] Eliminations by player:", eliminationsByPlayer);
+                
                 // Return the eliminated cores to their owners as charged cores
                 for (const [playerId, count] of Object.entries(eliminationsByPlayer)) {
                     const playerIndex = parseInt(playerId);
+                    const oldCount = gameState.players[playerIndex].chargedTokens;
                     
                     // Increment player's charged tokens
                     gameState.players[playerIndex].chargedTokens += count;
                     
-                    console.log(`Player ${playerIndex + 1} received ${count} charged cores from eliminations`);
-                    console.log(`Player ${playerIndex + 1} now has ${gameState.players[playerIndex].chargedTokens} charged cores`);
+                    console.log(`[DEBUG] Player ${playerIndex + 1} charged cores: ${oldCount} -> ${gameState.players[playerIndex].chargedTokens} (+${count})`);
                 }
                 
                 // Award points to current player
                 if (totalEliminatedValue > 0) {
-                    // Add score
                     gameState.players[gameState.currentPlayer].score += totalEliminatedValue;
-                    console.log(`Player ${gameState.currentPlayer + 1} gains ${totalEliminatedValue} points from eliminations`);
+                    console.log(`[DEBUG] Player ${gameState.currentPlayer + 1} gains ${totalEliminatedValue} points`);
                     
-                    // Create score update animation
                     animations.push({
                         type: 'score-update',
                         player: gameState.currentPlayer,
@@ -1592,11 +1590,12 @@
                 }
                 
                 // Force re-render of player cards
-                console.log("Updating player cards after eliminations");
+                console.log("[DEBUG] Final charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
                 updatePlayerCards();
                 
                 // Process after animations
                 setTimeout(() => {
+                    console.log("[DEBUG] Post-timeout charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
                     finishTurn();
                 }, 600);
             } catch (error) {
