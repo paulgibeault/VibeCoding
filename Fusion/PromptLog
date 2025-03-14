@@ -1,0 +1,6 @@
+Here are some corrections, please list all the places that need to be modified to support these changes:
+- fusions happen when any two like cores are next to eachother, not "(3+ cores in a row)" any mention of this should be corrected
+- The players "Charged" core count does not iwork.  It fails to ncrease or decrase when charged cores are returned or played.
+- The elimination logic also does not work when fused cores are near other fused cores of different values.  I want any higher core to attack an adjacent emeny core of a lower value at the end of a turn.  This may cause some chain reacions.
+
+Please plan out these changes such that you can implement them one by one
