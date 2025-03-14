@@ -1018,6 +1018,10 @@
 
         // End the current turn
         function endTurn() {
+            console.log("\n========== TURN START ==========");
+            console.log(`Player ${gameState.currentPlayer + 1}'s turn`);
+            console.log(`Charged tokens - P1: ${gameState.players[0].chargedTokens}, P2: ${gameState.players[1].chargedTokens}`);
+            logBoardState("Initial ");
             console.log("[DEBUG] End turn requested");
             console.log("[DEBUG] Current charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
             
@@ -1117,18 +1121,17 @@
         // Process core interactions (fusions and eliminations)
         function processCoreInteractions() {
             try {
-                console.log("Processing core interactions");
+                console.log("\n----- Processing Core Interactions -----");
                 
-                // Find all cells marked as just placed - these will be the sources for interactions
+                // Find all cells marked as just placed
                 const newCores = [];
                 for (let y = 0; y < GRID_SIZE; y++) {
                     for (let x = 0; x < GRID_SIZE; x++) {
                         const cell = gameState.grid[y][x];
                         if (cell.token && cell.justPlaced) {
-                            // Calculate the value of this newly placed core
                             const value = cell.value || (cell.token.startsWith('charged') ? 2 : 1);
                             newCores.push({ x, y, value });
-                            // Leave the justPlaced flag for now, will be used for fusion placement
+                            console.log(`New core placed at (${x}, ${y}) with value ${value}`);
                         }
                     }
                 }
@@ -1159,15 +1162,17 @@
                         // Calculate the value of the adjacent enemy core
                         const adjCoreValue = adjCell.value || (adjTokenType === 'energy' ? 1 : 2);
                         
-                        // If adjacent core belongs to opponent AND has equal or lesser value
-                        if (adjPlayer !== gameState.currentPlayer && adjCoreValue <= placedCoreValue) {
+                        console.log(`Checking elimination: Core at (${core.x}, ${core.y}) value ${placedCoreValue} vs adjacent at (${adjInfo.x}, ${adjInfo.y}) value ${adjCoreValue}`);
+                        
+                        // If adjacent core belongs to opponent AND has lower value
+                        if (adjPlayer !== gameState.currentPlayer && placedCoreValue > adjCoreValue) {
                             const posKey = `${adjInfo.x},${adjInfo.y}`;
                             
                             // Skip if already processed
                             if (eliminatedPositions.has(posKey)) return;
                             eliminatedPositions.add(posKey);
                             
-                            console.log(`Found eligible elimination at (${adjInfo.x}, ${adjInfo.y}): value ${adjCoreValue} <= ${placedCoreValue}`);
+                            console.log(`Found eligible elimination at (${adjInfo.x}, ${adjInfo.y}): value ${adjCoreValue} < ${placedCoreValue}`);
                             
                             // Add to eliminations
                             eliminations.push({
@@ -1302,8 +1307,48 @@
                     setTimeout(() => {
                         applyFusions(fusions);
                         
-                        // Then process eliminations
-                        if (eliminations.length > 0) {
+                        // Check for eliminations by the newly created higher-value cores
+                        const postFusionEliminations = [];
+                        fusions.forEach(fusion => {
+                            const targetCell = fusion.targetCell;
+                            console.log(`Checking post-fusion eliminations for core at (${targetCell.x}, ${targetCell.y}) with value ${fusion.newValue}`);
+                            
+                            // Get adjacent cells to check for eliminations
+                            const adjacentCells = getAdjacentCells(targetCell.x, targetCell.y);
+                            adjacentCells.forEach(adjInfo => {
+                                const adjCell = adjInfo.cell;
+                                if (!adjCell.token) return;
+                                
+                                const adjTokenParts = adjCell.token.split('-');
+                                const adjPlayer = parseInt(adjTokenParts[1]);
+                                const adjTokenType = adjTokenParts[0];
+                                const adjCoreValue = adjCell.value || (adjTokenType === 'energy' ? 1 : 2);
+                                
+                                console.log(`Checking post-fusion elimination: Core at (${targetCell.x}, ${targetCell.y}) value ${fusion.newValue} vs adjacent at (${adjInfo.x}, ${adjInfo.y}) value ${adjCoreValue}`);
+                                
+                                // If adjacent core belongs to opponent AND has lower value
+                                if (adjPlayer !== fusion.player && fusion.newValue > adjCoreValue) {
+                                    console.log(`Found post-fusion elimination at (${adjInfo.x}, ${adjInfo.y}): value ${adjCoreValue} < ${fusion.newValue}`);
+                                    postFusionEliminations.push({
+                                        x: adjInfo.x,
+                                        y: adjInfo.y,
+                                        token: adjCell.token,
+                                        tokenType: adjTokenParts[0],
+                                        player: adjPlayer,
+                                        eliminatedBy: fusion.player,
+                                        value: adjCoreValue
+                                    });
+                                }
+                            });
+                        });
+                        
+                        // Process any eliminations found after fusions
+                        if (postFusionEliminations.length > 0) {
+                            setTimeout(() => {
+                                processEliminations(postFusionEliminations);
+                            }, 500);
+                        } else if (eliminations.length > 0) {
+                            // Process original eliminations if any
                             setTimeout(() => {
                                 processEliminations(eliminations);
                             }, 500);
@@ -1462,6 +1507,7 @@
         // Apply fusion results
         function applyFusions(fusions) {
             try {
+                console.log("\n----- Applying Fusions -----");
                 if (fusions.length === 0) {
                     console.log("No fusions to apply");
                     return;
@@ -1503,21 +1549,22 @@
         // Process eliminations
         function processEliminations(eliminations) {
             try {
-                console.log("\n[DEBUG - ELIM] ========== Processing Eliminations ==========");
-                console.log("[DEBUG - ELIM] Initial charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
+                console.log("\n----- Processing Eliminations -----");
+                console.log(`Processing ${eliminations.length} eliminations`);
                 
                 if (!eliminations || eliminations.length === 0) {
-                    console.log("[DEBUG - ELIM] No eliminations to process");
+                    console.log("No eliminations to process");
                     finishTurn();
                     return;
                 }
-                
-                console.log(`[DEBUG] Processing ${eliminations.length} eliminations`);
-                console.log("[DEBUG] Current charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
-                
-                // Animate eliminations
+
                 eliminations.forEach(elim => {
-                    console.log(`[DEBUG] Processing elimination at (${elim.x}, ${elim.y}), token: ${elim.token}, player: ${elim.player}`);
+                    console.log(`\nElimination at (${elim.x}, ${elim.y}):`);
+                    console.log(`- Token: ${elim.token}`);
+                    console.log(`- Value: ${elim.value}`);
+                    console.log(`- Eliminated by Player ${elim.eliminatedBy + 1}`);
+                    
+                    // Add elimination animation
                     animations.push({
                         type: 'elimination',
                         target: { x: elim.x, y: elim.y },
@@ -1525,8 +1572,7 @@
                         attacker: elim.eliminatedBy,
                         defender: elim.player,
                         progress: 0,
-                        duration: 40,
-                        value: elim.value || (elim.tokenType === 'energy' ? 1 : 2)
+                        duration: 50
                     });
                 });
                 
@@ -1722,6 +1768,11 @@
 
         // Finish the current turn
         function finishTurn() {
+            console.log("\n----- Turn Complete -----");
+            logBoardState("Final ");
+            console.log(`Charged tokens - P1: ${gameState.players[0].chargedTokens}, P2: ${gameState.players[1].chargedTokens}`);
+            console.log(`Scores - P1: ${gameState.players[0].score}, P2: ${gameState.players[1].score}`);
+            console.log("========== TURN END ==========\n");
             // Check for game end condition
             if (checkGameEnd()) return;
             
@@ -2751,6 +2802,28 @@
         
         // Use both initialization methods with window.onload as primary for full reliability
         window.onload = init;
+
+        // Helper function to log board state
+        function logBoardState(prefix = "") {
+            console.log(`\n${prefix}Board State:`);
+            for (let y = 0; y < GRID_SIZE; y++) {
+                let row = "";
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    const cell = gameState.grid[y][x];
+                    if (!cell.token) {
+                        row += "[ ] ";
+                    } else {
+                        const tokenParts = cell.token.split('-');
+                        const type = tokenParts[0][0].toUpperCase(); // E for energy, C for charged
+                        const player = parseInt(tokenParts[1]) + 1;  // Convert to 1-based for readability
+                        const value = cell.value || (type === 'E' ? 1 : 2);
+                        row += `[${type}${player}:${value}] `;
+                    }
+                }
+                console.log(row);
+            }
+            console.log("\n");
+        }
     </script>
 </body>
 </html>
