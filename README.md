@@ -1,115 +1,50 @@
-# Energy Grid Game
+# Vibe Coding Sessions
 
+This repository contains my Vibe Coding sessions - a collaborative coding approach where I work alongside Claude 3.5 Sonnet, an AI coding assistant, to create and improve software projects. The term "Vibe Coding" represents a relaxed, conversational style of programming where we bounce ideas off each other, solve problems together, and create code that's both functional and elegant.
+
+## What is Vibe Coding?
+
+Vibe Coding is more than just programming - it's a collaborative experience where:
+- Human creativity meets AI assistance
+- Complex problems are broken down into manageable steps
+- Code is written with both functionality and readability in mind
+- Learning happens naturally through discussion and implementation
+- Projects evolve organically through iterative improvements
+
+## Projects
+
+### Energy Grid Game
 A strategic battle game where players compete to create powerful energy cores through fusion reactions and eliminate opponent cores.
 
-## How to Play
-
-### Game Objective
-Score the most points by creating fusions and eliminating opponent cores. The game ends when a player reaches 20 points.
-
-### Turn Structure
-1. Your first placed core each turn is automatically an Energy Core
-2. Any additional cores placed are Charged Cores (using your available supply)
-3. Click "End Turn" to confirm placement
-
-### Core Types
-- **Energy Core**: Basic core with value 1
-- **Charged Core**: Advanced core with value 2
-
-### Core Interactions
-- **Fusion (Same Cores)**: When you place a core orthogonally adjacent (not diagonally) to your own cores, they fuse into a single core at the placement location. The value of the new core is the sum of the fused cores.
-- **Elimination (Different Cores)**: When a core is adjacent to an opponent's core of lower value, the opponent's core is eliminated and returned to their owner as a charged core.
-
-### Scoring
-- Score increases by the sum of eliminated cores' values
-- Energy Core elimination: 1 point
-- Charged Core elimination: 3 points
-
-### Charged Cores
-- Players start with 0 charged cores
-- Placing a charged core decreases your charged core count by 1
-- When your cores are eliminated, they are returned to you as charged cores
-
-## Code Architecture
-
-### Core Components
-
-#### Game State Management
-- `GameState` class manages the overall game state
-- Tracks current player, grid state, and game progress
-- Handles player switching and game reset functionality
-
-#### Game Rules
-- `GameRules` class implements game logic and validation
-- Handles token placement validation
-- Manages fusion calculations and elimination checks
-- Controls game end conditions and winner determination
-
-#### Rendering System
-- `GameRenderer` class handles all visual aspects
-- Manages canvas rendering and animations
-- Implements particle effects and visual feedback
-
-#### Event Management
-- `GameEventManager` handles game events and callbacks
-- Manages user interactions and game state updates
-- Coordinates between different game components
-
-### Key Features
-- Responsive canvas-based rendering
-- Smooth animations for core interactions
+**Key Features:**
+- Canvas-based rendering with smooth animations
+- Core fusion and elimination mechanics
 - Mobile-friendly design
-- Comprehensive game state validation
-- Modular architecture for easy extension
+- Modular architecture
 
-## Technical Implementation
+[View Project README](Fusion/README.md)
 
-### Game Loop
-1. User selects cells for token placement
-2. End turn triggers token placement and interaction processing
-3. Core interactions (fusions and eliminations) are processed
-4. Game state is updated and rendered
-5. Turn switches to next player
+## Future Projects
+This space will be updated as new projects are added to the repository. Each project will have its own dedicated directory with a detailed README explaining its purpose, features, and implementation details.
 
-### State Management
-- Game state is maintained in a centralized `GameState` object
-- All state changes are validated through the `GameRules` class
-- State updates trigger appropriate UI updates and animations
+## Getting Started
+To explore any of the projects:
+1. Navigate to the project's directory
+2. Read the project-specific README for setup instructions
+3. Open the main HTML file in a modern web browser
 
-### Rendering Pipeline
-1. Clear canvas
-2. Draw grid
-3. Render tokens with appropriate effects
-4. Apply animations and particle effects
-5. Update UI elements
-
-## Development
-
-### Project Structure
-```
-Fusion/
-├── js/
-│   ├── core/
-│   │   └── GameState.js
-│   ├── rules/
-│   │   └── GameRules.js
-│   ├── rendering/
-│   │   └── GameRenderer.js
-│   ├── events/
-│   │   └── GameEventManager.js
-│   └── Game.js
-└── energy-grid-game.html
-```
-
-### Dependencies
-- Modern web browser with JavaScript enabled
-- Canvas API support
+## Technology Stack
+- HTML5
+- JavaScript (ES6+)
+- Canvas API
 - No external dependencies required
 
-## Credits
+## Contributing
+This is a personal repository documenting my Vibe Coding sessions. While it's primarily for my own use, suggestions and feedback are welcome through issues or pull requests.
 
-This game was developed with assistance from Claude 3.5 Sonnet, an AI coding assistant that helped with:
+## Credits
+All projects in this repository were developed with assistance from Claude 3.5 Sonnet, an AI coding assistant that helps with:
 - Code architecture and organization
-- Game logic implementation
+- Implementation of features
 - Bug fixes and optimizations
 - Documentation and README creation
