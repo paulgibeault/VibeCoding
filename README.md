@@ -13,7 +13,7 @@ Vibe Coding is more than just programming - it's a collaborative experience wher
 
 ## Projects
 
-### Energy Grid Game
+### Fusion
 A strategic battle game where players compete to create powerful energy cores through fusion reactions and eliminate opponent cores.
 
 **Key Features:**
@@ -23,6 +23,28 @@ A strategic battle game where players compete to create powerful energy cores th
 - Modular architecture
 
 [View Project README](Fusion/README.md)
+
+### Flight Simulator
+A 3D flight simulator demonstrating advanced physics and control systems.
+
+**Key Features:**
+- 3D flight simulation with realistic physics
+- Complex aircraft control systems
+- Dynamic camera views
+- Atmospheric conditions simulation
+
+[View Project README](FlightSim/README.md)
+
+### Simple Platformer
+A 2D platformer game showcasing basic physics and player movement mechanics.
+
+**Key Features:**
+- Basic 2D platformer mechanics
+- Player movement and jumping
+- Simple collision detection
+- Responsive controls
+
+[View Project README](SimplePlatformer/README.md)
 
 ## Future Projects
 This space will be updated as new projects are added to the repository. Each project will have its own dedicated directory with a detailed README explaining its purpose, features, and implementation details.
@@ -37,6 +59,7 @@ To explore any of the projects:
 - HTML5
 - JavaScript (ES6+)
 - Canvas API
+- WebGL (for Flight Simulator)
 - No external dependencies required
 
 ## Contributing

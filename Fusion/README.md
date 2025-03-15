@@ -1,4 +1,4 @@
-# Energy Grid Game
+# Fusion
 
 A strategic battle game where players compete to create powerful energy cores through fusion reactions and eliminate opponent cores.
 
@@ -98,7 +98,7 @@ Fusion/
 │   ├── events/
 │   │   └── GameEventManager.js
 │   └── Game.js
-└── energy-grid-game.html
+└── index.html
 ```
 
 ### Dependencies
