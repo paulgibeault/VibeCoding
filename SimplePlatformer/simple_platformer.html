@@ -1,0 +1,433 @@
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platformer Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #333;
+      color: white;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    #game-container {
+      position: relative;
+      width: 800px;
+      height: 600px;
+      background-color: #87CEEB;
+      border: 2px solid white;
+      overflow: hidden;
+    }
+    #player {
+      position: absolute;
+      width: 40px;
+      height: 60px;
+      background-color: #FF0000;
+      border-radius: 5px;
+    }
+    .platform {
+      position: absolute;
+      background-color: #8B4513;
+      border-radius: 5px;
+    }
+    .ground {
+      position: absolute;
+      background-color: #7CFC00;
+      border-radius: 5px;
+    }
+    .star {
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      background-color: #FFD700;
+      border-radius: 50%;
+    }
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 24px;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+    #message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 36px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      display: none;
+    }
+    #controls {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 5px;
+      text-align: center;
+    }
+    #debug {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      font-size: 14px;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 5px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="player"></div>
+    <div id="score">Score: 0</div>
+    <div id="message"></div>
+    <div id="debug"></div>
+  </div>
+  
+  <div id="controls">
+    <strong>Controls:</strong> Use ← → arrow keys to move left/right | Use ↑ arrow key to jump
+  </div>
+  
+  <script>
+    // Game elements
+    const player = document.getElementById('player');
+    const gameContainer = document.getElementById('game-container');
+    const scoreDisplay = document.getElementById('score');
+    const messageDisplay = document.getElementById('message');
+    const debugDisplay = document.getElementById('debug');
+    
+    // Game state
+    let playerX = 50;
+    let playerY = 300;
+    let velocityX = 0;
+    let velocityY = 0;
+    let isJumping = true;
+    let score = 0;
+    let gameActive = true;
+    let platforms = [];
+    let stars = [];
+    const totalStars = 10;
+    
+    // Constants
+    const GRAVITY = 0.5;
+    const JUMP_FORCE = -12;
+    const MOVE_SPEED = 5;
+    const PLAYER_WIDTH = 40;
+    const PLAYER_HEIGHT = 60;
+    const CONTAINER_WIDTH = 800;
+    const CONTAINER_HEIGHT = 600;
+    
+    // Key states
+    const keys = {
+      left: false,
+      right: false,
+      up: false
+    };
+    
+    // Create level
+    function createLevel() {
+      // Create ground
+      createPlatform(0, CONTAINER_HEIGHT - 40, CONTAINER_WIDTH, 40, 'ground');
+      
+      // Create platforms - designed for player to reach with proper jumps
+      createPlatform(100, 500, 200, 20);
+      createPlatform(370, 450, 200, 20);
+      createPlatform(650, 500, 150, 20);
+      createPlatform(100, 350, 150, 20);
+      createPlatform(350, 300, 180, 20);
+      createPlatform(600, 350, 150, 20);
+      createPlatform(200, 200, 180, 20);
+      createPlatform(450, 180, 150, 20);
+      createPlatform(650, 200, 100, 20);
+      
+      // Create stars strategically placed near platforms
+      for (let i = 0; i < totalStars; i++) {
+        createStar();
+      }
+    }
+    
+    // Create platform
+    function createPlatform(x, y, width, height, className = 'platform') {
+      const platform = document.createElement('div');
+      platform.className = className;
+      platform.style.left = x + 'px';
+      platform.style.top = y + 'px';
+      platform.style.width = width + 'px';
+      platform.style.height = height + 'px';
+      gameContainer.appendChild(platform);
+      
+      platforms.push({
+        element: platform,
+        x: x,
+        y: y,
+        width: width,
+        height: height
+      });
+    }
+    
+    // Create star
+    function createStar() {
+      const starSize = 25;
+      const star = document.createElement('div');
+      star.className = 'star';
+      
+      // Position stars near platforms but not directly on top
+      let validPosition = false;
+      let starX, starY;
+      
+      while (!validPosition) {
+        // Pick a random platform
+        const platform = platforms[Math.floor(Math.random() * platforms.length)];
+        
+        // Position star above platform
+        starX = platform.x + Math.random() * (platform.width - starSize);
+        starY = platform.y - 30 - Math.random() * 50;
+        
+        // Ensure star is within game bounds
+        if (starY < 50) starY = 50;
+        
+        // Check if star overlaps with existing stars
+        validPosition = true;
+        for (let i = 0; i < stars.length; i++) {
+          const existingStar = stars[i];
+          const distance = Math.sqrt(
+            Math.pow(starX - existingStar.x, 2) + 
+            Math.pow(starY - existingStar.y, 2)
+          );
+          
+          if (distance < 50) { // Minimum distance between stars
+            validPosition = false;
+            break;
+          }
+        }
+      }
+      
+      star.style.left = starX + 'px';
+      star.style.top = starY + 'px';
+      gameContainer.appendChild(star);
+      
+      stars.push({
+        element: star,
+        x: starX,
+        y: starY,
+        width: starSize,
+        height: starSize,
+        collected: false
+      });
+    }
+    
+    // Initialize player position
+    function updatePlayerPosition() {
+      player.style.left = playerX + 'px';
+      player.style.top = playerY + 'px';
+    }
+    
+    // Listen for key events
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'ArrowLeft') keys.left = true;
+      if (e.key === 'ArrowRight') keys.right = true;
+      if (e.key === 'ArrowUp') keys.up = true;
+      
+      // Restart game if space pressed and game is over
+      if (e.key === ' ' && !gameActive) {
+        resetGame();
+      }
+    });
+    
+    window.addEventListener('keyup', function(e) {
+      if (e.key === 'ArrowLeft') keys.left = false;
+      if (e.key === 'ArrowRight') keys.right = false;
+      if (e.key === 'ArrowUp') keys.up = false;
+    });
+    
+    // Check collision between two rectangles
+    function checkCollision(rect1, rect2) {
+      return (
+        rect1.x < rect2.x + rect2.width &&
+        rect1.x + rect1.width > rect2.x &&
+        rect1.y < rect2.y + rect2.height &&
+        rect1.y + rect1.height > rect2.y
+      );
+    }
+    
+    // Game loop
+    function gameLoop() {
+      if (!gameActive) return;
+      
+      // Handle movement
+      if (keys.left) velocityX = -MOVE_SPEED;
+      else if (keys.right) velocityX = MOVE_SPEED;
+      else velocityX = 0;
+      
+      // Apply gravity
+      velocityY += GRAVITY;
+      
+      // Handle jumping
+      if (keys.up && !isJumping) {
+        velocityY = JUMP_FORCE;
+        isJumping = true;
+      }
+      
+      // Update position
+      playerX += velocityX;
+      playerY += velocityY;
+      
+      // Keep player in bounds
+      if (playerX < 0) playerX = 0;
+      if (playerX > CONTAINER_WIDTH - PLAYER_WIDTH) 
+        playerX = CONTAINER_WIDTH - PLAYER_WIDTH;
+      
+      // Check for game over if player falls off the screen
+      if (playerY > CONTAINER_HEIGHT) {
+        gameOver();
+        return;
+      }
+      
+      // Check collision with platforms
+      isJumping = true; // Assume jumping unless on platform
+      
+      const playerRect = {
+        x: playerX,
+        y: playerY,
+        width: PLAYER_WIDTH,
+        height: PLAYER_HEIGHT
+      };
+      
+      // Check platform collisions
+      platforms.forEach(platform => {
+        const platformRect = {
+          x: platform.x,
+          y: platform.y,
+          width: platform.width,
+          height: platform.height
+        };
+        
+        // Check if player is on top of platform
+        if (velocityY >= 0 && 
+            playerRect.y + playerRect.height >= platformRect.y &&
+            playerRect.y + playerRect.height <= platformRect.y + 10 &&
+            playerRect.x + playerRect.width > platformRect.x &&
+            playerRect.x < platformRect.x + platformRect.width) {
+          
+          playerY = platformRect.y - PLAYER_HEIGHT;
+          velocityY = 0;
+          isJumping = false;
+        }
+        
+        // Check for left/right/top collisions
+        else if (checkCollision(playerRect, platformRect)) {
+          // Coming from left
+          if (playerX + PLAYER_WIDTH - velocityX <= platformRect.x) {
+            playerX = platformRect.x - PLAYER_WIDTH;
+          }
+          // Coming from right
+          else if (playerX - velocityX >= platformRect.x + platformRect.width) {
+            playerX = platformRect.x + platformRect.width;
+          }
+          // Coming from above (head bump)
+          else if (playerY - velocityY >= platformRect.y + platformRect.height) {
+            playerY = platformRect.y + platformRect.height;
+            velocityY = 0;
+          }
+        }
+      });
+      
+      // Check collision with stars
+      let starsCollected = 0;
+      stars.forEach(star => {
+        if (!star.collected) {
+          const starRect = {
+            x: star.x,
+            y: star.y,
+            width: star.width,
+            height: star.height
+          };
+          
+          if (checkCollision(playerRect, starRect)) {
+            star.collected = true;
+            star.element.style.display = 'none';
+            score += 10;
+            scoreDisplay.textContent = 'Score: ' + score;
+          }
+        }
+        
+        if (star.collected) {
+          starsCollected++;
+        }
+      });
+      
+      // Check if all stars collected
+      if (starsCollected === totalStars) {
+        showMessage('Level Complete!<br>Score: ' + score);
+        gameActive = false;
+      }
+      
+      // Update debug display
+      debugDisplay.textContent = `Position: (${Math.round(playerX)}, ${Math.round(playerY)}) | Velocity: (${Math.round(velocityX)}, ${Math.round(velocityY)}) | Jumping: ${isJumping}`;
+      
+      // Update visual position
+      updatePlayerPosition();
+      
+      // Continue game loop
+      requestAnimationFrame(gameLoop);
+    }
+    
+    function gameOver() {
+      showMessage('Game Over!<br>Press SPACE to restart');
+      gameActive = false;
+    }
+    
+    function showMessage(text) {
+      messageDisplay.innerHTML = text;
+      messageDisplay.style.display = 'block';
+    }
+    
+    function resetGame() {
+      // Reset game state
+      playerX = 50;
+      playerY = 300;
+      velocityX = 0;
+      velocityY = 0;
+      isJumping = true;
+      score = 0;
+      gameActive = true;
+      
+      // Clear existing elements
+      platforms.forEach(platform => {
+        platform.element.remove();
+      });
+      stars.forEach(star => {
+        star.element.remove();
+      });
+      platforms = [];
+      stars = [];
+      
+      // Reset displays
+      scoreDisplay.textContent = 'Score: 0';
+      messageDisplay.style.display = 'none';
+      
+      // Create new level
+      createLevel();
+      
+      // Start game loop again
+      requestAnimationFrame(gameLoop);
+    }
+    
+    // Initialize game
+    createLevel();
+    updatePlayerPosition();
+    gameLoop();
+  </script>
+</body>
+</html>
