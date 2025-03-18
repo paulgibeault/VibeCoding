@@ -1,11 +1,24 @@
 import { Token } from './Token.js';
 
-export class ChargedToken extends Token {
+export class EnergyFragment extends Token {
+    constructor(value) {
+        super();
+        this.value = value;
+    }
+
     getType() {
-        return 'charged';
+        return 'fragment';
     }
 
     getBaseValue() {
-        return 2;
+        return this.value;
+    }
+
+    // Method to convert fragments to a core
+    convertToCore() {
+        return {
+            type: 'energy',
+            value: 1
+        };
     }
 } 

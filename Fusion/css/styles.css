@@ -1,0 +1,173 @@
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 2rem;
+    min-height: 100vh;
+    background: #1a1a1a;
+    color: #ffffff;
+}
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+}
+
+.game-board {
+    position: relative;
+    background: #2a2a2a;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.player-cards {
+    display: flex;
+    gap: 2rem;
+    width: 100%;
+    max-width: 800px;
+    justify-content: center;
+}
+
+.player-card {
+    background: #2a2a2a;
+    border-radius: 8px;
+    padding: 1rem;
+    min-width: 200px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.player-card.current {
+    box-shadow: 0 0 20px var(--player-glow);
+    transform: scale(1.05);
+}
+
+.player-info {
+    margin-bottom: 1rem;
+}
+
+.player-name {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--player-color);
+    margin-bottom: 0.5rem;
+}
+
+.player-score {
+    color: #ffffff;
+}
+
+.player-fragments {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.fragment-count {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--player-color);
+    min-width: 2rem;
+    text-align: center;
+}
+
+.fragment-chamber {
+    flex: 1;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.fragment-chamber::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: var(--fill-percentage, 0%);
+    background: linear-gradient(90deg, var(--player-color) 0%, var(--player-glow) 100%);
+    transition: width 0.3s ease;
+}
+
+.fragment-chamber.full::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.5) 0%, transparent 70%);
+    animation: pulse 2s infinite;
+}
+
+.player-tokens {
+    color: #ffffff;
+    font-size: 0.9rem;
+}
+
+.game-controls {
+    display: flex;
+    gap: 1rem;
+}
+
+button {
+    background: #3a3a3a;
+    color: #ffffff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background: #4a4a4a;
+}
+
+.game-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 5px;
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+}
+
+.game-notification.error {
+    background: rgba(255, 0, 0, 0.8);
+}
+
+.game-notification.fade-out {
+    animation: fadeOut 0.5s ease forwards;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    50% { opacity: 1; }
+    100% { opacity: 0.5; }
+}
+
+@keyframes slideIn {
+    from { transform: translate(-50%, -100%); }
+    to { transform: translate(-50%, 0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+} 

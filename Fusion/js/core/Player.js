@@ -1,35 +1,39 @@
-export class Player {
+class Player {
     constructor(name, color, glowColor) {
         this.name = name;
-        this.score = 0;
-        this.chargedTokens = 0;
         this.color = color;
         this.glowColor = glowColor;
+        this.score = 0;
+        this.energyFragments = 0;
+        this.maxFragments = 9; // Maximum number of fragments a player can hold
+    }
+
+    reset() {
+        this.score = 0;
+        this.energyFragments = 0;
     }
 
     addScore(points) {
         this.score += points;
-        return this.score >= WINNING_SCORE;
     }
 
-    addChargedTokens(count) {
-        this.chargedTokens += count;
+    addEnergyFragments(fragments) {
+        this.energyFragments = Math.min(this.energyFragments + fragments, this.maxFragments);
     }
 
-    useChargedToken() {
-        if (this.chargedTokens > 0) {
-            this.chargedTokens--;
+    useFragments(fragments) {
+        if (this.energyFragments >= fragments) {
+            this.energyFragments -= fragments;
             return true;
         }
         return false;
     }
 
-    reset() {
-        this.score = 0;
-        this.chargedTokens = 0;
+    getFragmentCount() {
+        return this.energyFragments;
     }
 
-    canPlaceChargedToken() {
-        return this.chargedTokens > 0;
+    canConvertFragments() {
+        return this.energyFragments >= 3; // Assuming 3 fragments needed for a core
     }
 } 

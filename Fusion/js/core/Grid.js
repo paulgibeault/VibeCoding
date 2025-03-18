@@ -1,18 +1,24 @@
-import { Cell } from './Cell.js';
-
-export class Grid {
-    constructor(size) {
-        this.size = size;
-        this.cells = this.initializeCells();
+class Grid {
+    constructor(width, height) {
+        this.width = width;
+        this.height = height;
+        this.cells = [];
+        this.initialize();
     }
 
-    initializeCells() {
-        return Array(this.size).fill().map((_, y) => 
-            Array(this.size).fill().map((_, x) => new Cell(x, y))
-        );
+    initialize() {
+        for (let y = 0; y < this.height; y++) {
+            this.cells[y] = [];
+            for (let x = 0; x < this.width; x++) {
+                this.cells[y][x] = new Cell(x, y);
+            }
+        }
     }
 
     getCell(x, y) {
+        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+            return null;
+        }
         return this.cells[y][x];
     }
 
@@ -36,11 +42,11 @@ export class Grid {
     }
 
     isValidPosition(x, y) {
-        return x >= 0 && x < this.size && y >= 0 && y < this.size;
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
     }
 
     reset() {
-        this.cells = this.initializeCells();
+        this.initialize();
     }
 
     clearCell(x, y) {
@@ -48,10 +54,23 @@ export class Grid {
     }
 
     forEach(callback) {
-        for (let y = 0; y < this.size; y++) {
-            for (let x = 0; x < this.size; x++) {
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
                 callback(this.getCell(x, y), x, y);
             }
         }
+    }
+
+    getPlayerTokenCount(player) {
+        let count = 0;
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                const cell = this.cells[y][x];
+                if (cell.hasToken() && cell.getTokenPlayer() === player) {
+                    count++;
+                }
+            }
+        }
+        return count;
     }
 } 

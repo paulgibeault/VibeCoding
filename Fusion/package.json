@@ -1,0 +1,10 @@
+{
+  "name": "fusion-game",
+  "version": "1.0.0",
+  "description": "A strategic board game with energy core mechanics",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+} 

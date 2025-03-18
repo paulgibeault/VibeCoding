@@ -1,34 +1,30 @@
-export class GameEventManager {
+class GameEventManager {
     constructor() {
-        this.listeners = {};
+        this.listeners = new Map();
     }
 
     on(event, callback) {
-        if (!this.listeners[event]) {
-            this.listeners[event] = [];
+        if (!this.listeners.has(event)) {
+            this.listeners.set(event, []);
         }
-        this.listeners[event].push(callback);
+        this.listeners.get(event).push(callback);
     }
 
     off(event, callback) {
-        if (this.listeners[event]) {
-            this.listeners[event] = this.listeners[event].filter(cb => cb !== callback);
+        if (!this.listeners.has(event)) return;
+        const callbacks = this.listeners.get(event);
+        const index = callbacks.indexOf(callback);
+        if (index !== -1) {
+            callbacks.splice(index, 1);
         }
     }
 
     emit(event, data) {
-        if (this.listeners[event]) {
-            this.listeners[event].forEach(callback => {
-                try {
-                    callback(data);
-                } catch (error) {
-                    console.error(`Error in event listener for ${event}:`, error);
-                }
-            });
-        }
+        if (!this.listeners.has(event)) return;
+        this.listeners.get(event).forEach(callback => callback(data));
     }
 
     clear() {
-        this.listeners = {};
+        this.listeners = new Map();
     }
 } 
