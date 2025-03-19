@@ -203,6 +203,7 @@
         .player-stats {
             display: flex;
             justify-content: space-between;
+            margin-bottom: 15px;
         }
 
         .stat {
@@ -239,6 +240,90 @@
             color: #CCC;
             letter-spacing: 1px;
             font-weight: 300;
+        }
+
+        .energy-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 10px;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .energy-container::before {
+            content: "Energy Container";
+            position: absolute;
+            top: -12px;
+            left: 10px;
+            background: var(--background-color);
+            padding: 0 8px;
+            font-size: 0.8rem;
+            color: var(--tertiary-color);
+            font-weight: bold;
+        }
+
+        .energy-slots {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            align-items: center;
+            min-height: 40px;
+        }
+
+        .energy-slot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            transition: all 0.3s ease;
+            will-change: transform, opacity;
+        }
+
+        .energy-slot.has-core {
+            border-color: var(--tertiary-color);
+            box-shadow: 0 0 10px rgba(255, 200, 87, 0.3);
+            background: rgba(255, 200, 87, 0.2);
+            transform: scale(1.1);
+        }
+
+        .energy-slot.has-core::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--tertiary-color);
+            opacity: 1;
+            transition: all 0.3s ease;
+        }
+
+        .energy-slot.full {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(255, 90, 95, 0.3);
+            background: rgba(255, 90, 95, 0.2);
+            transform: scale(1.1);
+        }
+
+        .energy-slot.full::after {
+            background: var(--primary-color);
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .energy-count {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: var(--text-color);
+            opacity: 0.8;
+            font-weight: bold;
         }
 
         /* Game board */
@@ -601,14 +686,14 @@
         let gameState = {
             currentPlayer: 0, // 0 or 1
             players: [
-                { name: PLAYER_NAMES[0], score: 0, chargedTokens: 0 }, // Changed to 0
-                { name: PLAYER_NAMES[1], score: 0, chargedTokens: 0 }  // Changed to 0
+                { name: PLAYER_NAMES[0], score: 0, chargedCores: [], maxChargedCores: 5 }, // Changed to array
+                { name: PLAYER_NAMES[1], score: 0, chargedCores: [], maxChargedCores: 5 }  // Changed to array
             ],
             grid: [], // Will be initialized as 2D array
             selectedCells: [], // Cells selected for token placement
             turnPhase: 'selecting', // 'selecting' or 'animation'
             placedEnergyToken: false, // Flag to track if energy token has been placed
-            gameOver: false
+            gameOver: false,
         };
 
         // Canvas and rendering variables
@@ -735,10 +820,16 @@
                             <div class="stat-value">${player.score}</div>
                             <div class="stat-label">Score</div>
                         </div>
-                        <div class="stat">
-                            <div class="stat-value">${player.chargedTokens}</div>
-                            <div class="stat-label">Charged</div>
+                    </div>
+                    <div class="energy-container">
+                        <div class="energy-slots">
+                            <div class="energy-slot"></div>
+                            <div class="energy-slot"></div>
+                            <div class="energy-slot"></div>
+                            <div class="energy-slot"></div>
+                            <div class="energy-slot"></div>
                         </div>
+                        <div class="energy-count">0/5</div>
                     </div>
                 `;
                 
@@ -747,15 +838,20 @@
             });
             
             console.log("All player cards created successfully");
+            
+            // Initialize energy containers
+            gameState.players.forEach((player, index) => {
+                updateEnergyContainer(index);
+            });
         }
 
         // Update player cards with current game state
         function updatePlayerCards() {
             console.log("[DEBUG] Updating player cards");
             console.log("[DEBUG] Player states before update - P1:", 
-                {score: gameState.players[0].score, charged: gameState.players[0].chargedTokens},
+                {score: gameState.players[0].score, charged: gameState.players[0].chargedCores.length},
                 "P2:", 
-                {score: gameState.players[1].score, charged: gameState.players[1].chargedTokens}
+                {score: gameState.players[1].score, charged: gameState.players[1].chargedCores.length}
             );
             
             const playerCardsContainer = document.querySelector('.player-cards');
@@ -782,15 +878,21 @@
                             <div class="stat-value">${player.score}</div>
                             <div class="stat-label">Score</div>
                         </div>
-                        <div class="stat">
-                            <div class="stat-value">${player.chargedTokens}</div>
-                            <div class="stat-label">Charged</div>
+                    </div>
+                    <div class="energy-container">
+                        <div class="energy-slots">
+                            <div class="energy-slot"></div>
+                            <div class="energy-slot"></div>
+                            <div class="energy-slot"></div>
+                            <div class="energy-slot"></div>
+                            <div class="energy-slot"></div>
                         </div>
+                        <div class="energy-count">0/5</div>
                     </div>
                 `;
                 
                 playerCardsContainer.appendChild(playerCard);
-                console.log(`[DEBUG] Updated card for Player ${index + 1} - Score: ${player.score}, Charged: ${player.chargedTokens}`);
+                console.log(`[DEBUG] Updated card for Player ${index + 1} - Score: ${player.score}, Charged: ${player.chargedCores.length}`);
             });
             
             console.log("[DEBUG] Player cards update complete");
@@ -799,7 +901,7 @@
         // Handle canvas click events
         function handleCanvasClick(event) {
             console.log("\n[DEBUG - CLICK] ========== Canvas Click Event ==========");
-            console.log("[DEBUG - CLICK] Current charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
+            console.log("[DEBUG - CLICK] Current charged tokens - P1:", gameState.players[0].chargedCores.length, "P2:", gameState.players[1].chargedCores.length);
             console.log("[DEBUG - CLICK] Current player:", gameState.currentPlayer + 1);
             console.log("[DEBUG - CLICK] Selected cells count:", gameState.selectedCells.length);
             console.log("[DEBUG - CLICK] Energy token placed:", gameState.placedEnergyToken);
@@ -853,10 +955,10 @@
                             
                             // Only modify charged count if deselecting a charged core
                             if (deselectedCell.type === 'charged') {
-                                const oldCount = gameState.players[gameState.currentPlayer].chargedTokens;
+                                const oldCount = gameState.players[gameState.currentPlayer].chargedCores.length;
                                 // Return the charged core to the player's count
-                                gameState.players[gameState.currentPlayer].chargedTokens++;
-                                console.log(`[DEBUG - CLICK] Returned charged core to player ${gameState.currentPlayer + 1}, count: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedTokens}`);
+                                gameState.players[gameState.currentPlayer].chargedCores.push(2);
+                                console.log(`[DEBUG - CLICK] Returned charged core to player ${gameState.currentPlayer + 1}, count: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedCores.length}`);
                                 updatePlayerCards();
                             } else if (deselectedCell.type === 'energy') {
                                 // If deselecting energy core, update the flag
@@ -876,7 +978,7 @@
                         console.log("[DEBUG - CLICK] Attempting to select empty cell");
                         
                         // Check if exceeding max selections
-                        const maxSelections = 1 + gameState.players[gameState.currentPlayer].chargedTokens;
+                        const maxSelections = 1 + gameState.players[gameState.currentPlayer].chargedCores.length;
                         console.log(`[DEBUG - CLICK] Max selections allowed: ${maxSelections}, current selections: ${gameState.selectedCells.length}`);
                         
                         if (gameState.selectedCells.length + 1 > maxSelections) {
@@ -893,7 +995,7 @@
                         console.log(`[DEBUG - CLICK] Token type for selection: ${tokenType}`);
                         
                         // If trying to place a charged token when none are available
-                        if (tokenType === 'charged' && gameState.players[gameState.currentPlayer].chargedTokens === 0) {
+                        if (tokenType === 'charged' && gameState.players[gameState.currentPlayer].chargedCores.length === 0) {
                             console.log("[DEBUG - CLICK] No charged cores available");
                             updateGameStatus("No charged cores available!", true);
                             setTimeout(() => {
@@ -908,10 +1010,10 @@
                             console.log("[DEBUG - CLICK] Energy token selected, placedEnergyToken set to true");
                             updateGameStatus("Energy core selected");
                         } else {
-                            const oldCount = gameState.players[gameState.currentPlayer].chargedTokens;
+                            const oldCount = gameState.players[gameState.currentPlayer].chargedCores.length;
                             // Decrement charged core count when selecting a charged core
-                            gameState.players[gameState.currentPlayer].chargedTokens--;
-                            console.log(`[DEBUG - CLICK] Used charged core, player ${gameState.currentPlayer + 1} count: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedTokens}`);
+                            gameState.players[gameState.currentPlayer].chargedCores.pop();
+                            console.log(`[DEBUG - CLICK] Used charged core, player ${gameState.currentPlayer + 1} count: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedCores.length}`);
                             updatePlayerCards();
                             updateGameStatus("Charged core selected");
                         }
@@ -930,7 +1032,7 @@
                     // Force re-render
                     render();
                     
-                    console.log("[DEBUG - CLICK] Final state - Charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
+                    console.log("[DEBUG - CLICK] Final state - Charged tokens - P1:", gameState.players[0].chargedCores.length, "P2:", gameState.players[1].chargedCores.length);
                     console.log("[DEBUG - CLICK] Selected cells:", gameState.selectedCells);
                     console.log("[DEBUG - CLICK] ========== End Click Event ==========\n");
                 } catch (error) {
@@ -971,10 +1073,10 @@
         function endTurn() {
             console.log("\n========== TURN START ==========");
             console.log(`Player ${gameState.currentPlayer + 1}'s turn`);
-            console.log(`Charged tokens - P1: ${gameState.players[0].chargedTokens}, P2: ${gameState.players[1].chargedTokens}`);
+            console.log(`Charged tokens - P1: ${gameState.players[0].chargedCores.length}, P2: ${gameState.players[1].chargedCores.length}`);
             logBoardState("Initial ");
             console.log("[DEBUG] End turn requested");
-            console.log("[DEBUG] Current charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
+            console.log("[DEBUG] Current charged tokens - P1:", gameState.players[0].chargedCores.length, "P2:", gameState.players[1].chargedCores.length);
             
             if (!gameReadyToRender) {
                 console.log("[DEBUG] Game not ready for turn end");
@@ -1001,7 +1103,7 @@
             // Verify player has enough charged tokens
             const chargedCount = gameState.selectedCells.filter(cell => cell.type === 'charged').length;
             console.log("[DEBUG] Attempting to place", chargedCount, "charged cores");
-            console.log("[DEBUG] Player", gameState.currentPlayer + 1, "has", gameState.players[gameState.currentPlayer].chargedTokens, "charged cores available");
+            console.log("[DEBUG] Player", gameState.currentPlayer + 1, "has", gameState.players[gameState.currentPlayer].chargedCores.length, "charged cores available");
             
             try {
                 // Change phase to animation
@@ -1012,7 +1114,7 @@
                 // Place tokens on the grid
                 placeTokens();
                 console.log("[DEBUG] Tokens placed on grid");
-                console.log("[DEBUG] Current charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
+                console.log("[DEBUG] Current charged tokens - P1:", gameState.players[0].chargedCores.length, "P2:", gameState.players[1].chargedCores.length);
                 
                 // Reset energy token flag for next turn
                 gameState.placedEnergyToken = false;
@@ -1556,12 +1658,11 @@
                 // Return the eliminated cores to their owners as charged cores
                 for (const [playerId, count] of Object.entries(eliminationsByPlayer)) {
                     const playerIndex = parseInt(playerId);
-                    const oldCount = gameState.players[playerIndex].chargedTokens;
                     
-                    // Increment player's charged tokens
-                    gameState.players[playerIndex].chargedTokens += count;
-                    
-                    console.log(`[DEBUG] Player ${playerIndex + 1} charged cores: ${oldCount} -> ${gameState.players[playerIndex].chargedTokens} (+${count})`);
+                    // Try to add each eliminated core to the container
+                    for (let i = 0; i < count; i++) {
+                        addChargedCore(playerIndex);
+                    }
                 }
                 
                 // Award points to current player
@@ -1579,12 +1680,12 @@
                 }
                 
                 // Force re-render of player cards
-                console.log("[DEBUG] Final charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
+                console.log("[DEBUG] Final charged tokens - P1:", gameState.players[0].chargedCores.length, "P2:", gameState.players[1].chargedCores.length);
                 updatePlayerCards();
                 
                 // Process after animations
                 setTimeout(() => {
-                    console.log("[DEBUG] Post-timeout charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
+                    console.log("[DEBUG] Post-timeout charged tokens - P1:", gameState.players[0].chargedCores.length, "P2:", gameState.players[1].chargedCores.length);
                     finishTurn();
                 }, 600);
             } catch (error) {
@@ -1721,7 +1822,7 @@
         function finishTurn() {
             console.log("\n----- Turn Complete -----");
             logBoardState("Final ");
-            console.log(`Charged tokens - P1: ${gameState.players[0].chargedTokens}, P2: ${gameState.players[1].chargedTokens}`);
+            console.log(`Charged tokens - P1: ${gameState.players[0].chargedCores.length}, P2: ${gameState.players[1].chargedCores.length}`);
             console.log(`Scores - P1: ${gameState.players[0].score}, P2: ${gameState.players[1].score}`);
             console.log("========== TURN END ==========\n");
             // Check for game end condition
@@ -2027,11 +2128,7 @@
                         
                         // Draw token preview
                         ctx.globalAlpha = 0.7;
-                        if (gameState.selectionMode === 'energy') {
-                            drawEnergyToken(centerX, centerY, radius, gameState.currentPlayer);
-                        } else {
-                            drawChargedToken(centerX, centerY, radius, gameState.currentPlayer);
-                        }
+                        drawEnergyToken(centerX, centerY, radius, gameState.currentPlayer);
                         ctx.globalAlpha = 1.0;
                     }
                     
@@ -2774,6 +2871,80 @@
                 console.log(row);
             }
             console.log("\n");
+        }
+
+        // Add new functions for energy container management
+        function addChargedCore(playerIndex, coreValue = 2) {
+            const player = gameState.players[playerIndex];
+            if (player.chargedCores.length >= player.maxChargedCores) {
+                console.log(`[DEBUG] Player ${playerIndex + 1}'s energy container is full`);
+                return false;
+            }
+            
+            player.chargedCores.push(coreValue);
+            updateEnergyContainer(playerIndex);
+            return true;
+        }
+
+        function removeChargedCore(playerIndex) {
+            const player = gameState.players[playerIndex];
+            if (player.chargedCores.length === 0) {
+                console.log(`[DEBUG] Player ${playerIndex + 1}'s energy container is empty`);
+                return null;
+            }
+            
+            const core = player.chargedCores.pop();
+            updateEnergyContainer(playerIndex);
+            return core;
+        }
+
+        function updateEnergyContainer(playerIndex) {
+            const player = gameState.players[playerIndex];
+            console.log(`[DEBUG] Updating energy container for Player ${playerIndex + 1}`);
+            console.log(`[DEBUG] Current charged cores: ${player.chargedCores.length}/${player.maxChargedCores}`);
+            
+            const container = document.querySelector(`.player${playerIndex + 1} .energy-slots`);
+            const countDisplay = document.querySelector(`.player${playerIndex + 1} .energy-count`);
+            
+            if (!container || !countDisplay) {
+                console.error(`[DEBUG] Could not find energy container elements for Player ${playerIndex + 1}`);
+                return;
+            }
+            
+            // Update slots
+            const slots = container.querySelectorAll('.energy-slot');
+            console.log(`[DEBUG] Found ${slots.length} energy slots`);
+            
+            // Force a reflow before updating classes
+            container.offsetHeight;
+            
+            // Remove all classes first to ensure clean state
+            slots.forEach(slot => {
+                slot.classList.remove('has-core', 'full');
+            });
+            
+            // Force another reflow after removing classes
+            container.offsetHeight;
+            
+            // Now add classes based on current state
+            slots.forEach((slot, index) => {
+                if (index < player.chargedCores.length) {
+                    slot.classList.add('has-core');
+                    if (player.chargedCores.length >= player.maxChargedCores) {
+                        slot.classList.add('full');
+                    }
+                    console.log(`[DEBUG] Slot ${index + 1}: Added core`);
+                } else {
+                    console.log(`[DEBUG] Slot ${index + 1}: Empty`);
+                }
+            });
+            
+            // Update count display
+            countDisplay.textContent = `${player.chargedCores.length}/${player.maxChargedCores}`;
+            console.log(`[DEBUG] Updated count display to ${player.chargedCores.length}/${player.maxChargedCores}`);
+            
+            // Force a final reflow after all updates
+            container.offsetHeight;
         }
     </script>
 </body>
