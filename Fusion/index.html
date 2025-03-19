@@ -301,6 +301,7 @@
             background: var(--tertiary-color);
             opacity: 1;
             transition: all 0.3s ease;
+            z-index: 1;
         }
 
         .energy-slot.full {
@@ -1679,15 +1680,26 @@
                     });
                 }
                 
-                // Force re-render of player cards
+                // Force re-render of player cards and energy containers
                 console.log("[DEBUG] Final charged tokens - P1:", gameState.players[0].chargedCores.length, "P2:", gameState.players[1].chargedCores.length);
                 updatePlayerCards();
                 
-                // Process after animations
+                // Update energy containers for all players with a slight delay to ensure animations complete
                 setTimeout(() => {
-                    console.log("[DEBUG] Post-timeout charged tokens - P1:", gameState.players[0].chargedCores.length, "P2:", gameState.players[1].chargedCores.length);
-                    finishTurn();
-                }, 600);
+                    gameState.players.forEach((player, index) => {
+                        updateEnergyContainer(index);
+                    });
+                    
+                    // Process after animations
+                    setTimeout(() => {
+                        console.log("[DEBUG] Post-timeout charged tokens - P1:", gameState.players[0].chargedCores.length, "P2:", gameState.players[1].chargedCores.length);
+                        // Force one final update of energy containers
+                        gameState.players.forEach((player, index) => {
+                            updateEnergyContainer(index);
+                        });
+                        finishTurn();
+                    }, 600);
+                }, 100);
             } catch (error) {
                 console.error("Error processing eliminations:", error);
                 finishTurn(); // Try to recover by finishing the turn
@@ -1825,6 +1837,7 @@
             console.log(`Charged tokens - P1: ${gameState.players[0].chargedCores.length}, P2: ${gameState.players[1].chargedCores.length}`);
             console.log(`Scores - P1: ${gameState.players[0].score}, P2: ${gameState.players[1].score}`);
             console.log("========== TURN END ==========\n");
+            
             // Check for game end condition
             if (checkGameEnd()) return;
             
@@ -1834,12 +1847,12 @@
             // Reset turn phase
             gameState.turnPhase = 'selecting';
             
+            // Reset energy token placement flag for next turn
+            gameState.placedEnergyToken = false;
+            
             // Update UI
             updatePlayerCards();
             document.getElementById('gameStatus').textContent = `${gameState.players[gameState.currentPlayer].name}'s turn`;
-            
-            // Switch selection mode back to energy
-            setSelectionMode('energy');
         }
 
         // Check if the game has ended
@@ -2915,16 +2928,10 @@
             const slots = container.querySelectorAll('.energy-slot');
             console.log(`[DEBUG] Found ${slots.length} energy slots`);
             
-            // Force a reflow before updating classes
-            container.offsetHeight;
-            
             // Remove all classes first to ensure clean state
             slots.forEach(slot => {
                 slot.classList.remove('has-core', 'full');
             });
-            
-            // Force another reflow after removing classes
-            container.offsetHeight;
             
             // Now add classes based on current state
             slots.forEach((slot, index) => {
@@ -2943,9 +2950,10 @@
             countDisplay.textContent = `${player.chargedCores.length}/${player.maxChargedCores}`;
             console.log(`[DEBUG] Updated count display to ${player.chargedCores.length}/${player.maxChargedCores}`);
             
-            // Force a final reflow after all updates
+            // Force a reflow to ensure the changes are applied
             container.offsetHeight;
         }
+
     </script>
 </body>
 </html>
