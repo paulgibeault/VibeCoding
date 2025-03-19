@@ -606,7 +606,6 @@
             ],
             grid: [], // Will be initialized as 2D array
             selectedCells: [], // Cells selected for token placement
-            selectionMode: 'energy', // 'energy' or 'charged'
             turnPhase: 'selecting', // 'selecting' or 'animation'
             placedEnergyToken: false, // Flag to track if energy token has been placed
             gameOver: false
@@ -797,54 +796,6 @@
             console.log("[DEBUG] Player cards update complete");
         }
 
-        // Set the current selection mode
-        function setSelectionMode(mode) {
-            console.log(`Selection mode change requested: ${mode}`);
-            
-            // Don't allow changing if game is over
-            if (gameState.gameOver) {
-                console.log("Game is over, ignoring selection mode change");
-                return;
-            }
-            
-            // Don't switch to charged if player has no charged tokens
-            if (mode === 'charged' && gameState.players[gameState.currentPlayer].chargedTokens <= 0) {
-                console.log("Player has no charged tokens available");
-                updateGameStatus("No charged cores available!", true);
-                setTimeout(() => {
-                    updateGameStatus("Game in progress...");
-                }, 2000);
-                return;
-            }
-            
-            gameState.selectionMode = mode;
-            console.log(`Selection mode changed to: ${mode}`);
-            updateGameStatus(`Selected ${mode} core placement mode`);
-            
-            try {
-                // Update UI to reflect current mode
-                const energyBtn = document.getElementById('energyTokenBtn');
-                const chargedBtn = document.getElementById('chargedTokenBtn');
-                
-                if (!energyBtn || !chargedBtn) {
-                    console.error("Energy or charged button not found in the DOM");
-                    return;
-                }
-                
-                if (mode === 'energy') {
-                    energyBtn.classList.add('active');
-                    chargedBtn.classList.remove('active');
-                } else {
-                    energyBtn.classList.remove('active');
-                    chargedBtn.classList.add('active');
-                }
-                
-                console.log("Button UI updated successfully");
-            } catch (error) {
-                console.error("Error updating selection mode UI:", error);
-            }
-        }
-
         // Handle canvas click events
         function handleCanvasClick(event) {
             console.log("\n[DEBUG - CLICK] ========== Canvas Click Event ==========");
@@ -898,7 +849,7 @@
                         
                         if (index !== -1) {
                             const deselectedCell = gameState.selectedCells[index];
-                            console.log(`[DEBUG - CLICK] Found cell to deselect at index ${index}, type: ${deselectedCell.type}`);
+                            console.log(`[DEBUG - CLICK] Found cell to deselect at index ${index}`);
                             
                             // Only modify charged count if deselecting a charged core
                             if (deselectedCell.type === 'charged') {
