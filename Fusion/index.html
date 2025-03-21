@@ -931,29 +931,37 @@
                         cell.selected = false;
                     } else if (!cell.token) {
                         // Select empty cell
-                        const availableChargedCores = gameState.players[gameState.currentPlayer].chargedCores.length;
-                        
-                        if (availableChargedCores && !gameState.placedEnergyToken) {
-                            updateGameStatus(`All available charged cores have been used!`, true);
-                            setTimeout(() => updateGameStatus("Game in progress..."), 2000);
-                            return;
-                        }
-                        
                         const tokenType = gameState.selectedCells.length === 0 ? 'energy' : 'charged';
                         
-                        if (tokenType === 'charged' && gameState.players[gameState.currentPlayer].chargedCores.length === 0) {
-                            updateGameStatus("No charged cores available!", true);
-                            setTimeout(() => updateGameStatus("Game in progress..."), 2000);
-                            return;
-                        }
-                        
-                        if (tokenType === 'energy') {
-                            gameState.placedEnergyToken = true;
-                            updateGameStatus("Energy core selected");
-                        } else {
+                        if (tokenType === 'charged') {
+                            if (gameState.players[gameState.currentPlayer].chargedCores.length === 0) {
+                                updateGameStatus("No charged cores available!", true);
+                                setTimeout(() => updateGameStatus("Game in progress..."), 2000);
+                                return;
+                            }
+                            
+                            // Check if we've already used all available charged cores
+                            const usedChargedCores = gameState.selectedCells.filter(cell => cell.type === 'charged').length;
+                            if (usedChargedCores > gameState.players[gameState.currentPlayer].chargedCores.length) {
+                                updateGameStatus("All available charged cores have been used!", true);
+                                setTimeout(() => updateGameStatus("Game in progress..."), 2000);
+                                return;
+                            }
+                            
+                            // Remove one charged core and update UI
                             gameState.players[gameState.currentPlayer].chargedCores.pop();
                             updatePlayerCards();
                             updateGameStatus("Charged core selected");
+                        } else {
+                            // Energy core placement
+                            if (!gameState.placedEnergyToken) {
+                                gameState.placedEnergyToken = true;
+                                updateGameStatus("Energy core selected");
+                            } else {
+                                updateGameStatus("You can only place one energy core per turn!", true);
+                                setTimeout(() => updateGameStatus("Game in progress..."), 2000);
+                                return;
+                            }
                         }
                         
                         cell.selected = true;
