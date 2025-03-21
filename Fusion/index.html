@@ -890,94 +890,154 @@
             });
         }
 
-        // Handle canvas click events
+        // Helper function to get click coordinates relative to canvas
+        function getClickCoordinates(event) {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const clickY = event.clientY - rect.top;
+            
+            return {
+                x: Math.floor(clickX / cellSize),
+                y: Math.floor(clickY / cellSize)
+            };
+        }
+
+        // Helper function to check if coordinates are within grid bounds
+        function isValidCell(x, y) {
+            return x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE;
+        }
+
+        // Helper function to get cell at coordinates
+        function getClickedCell(x, y) {
+            if (!isValidCell(x, y)) return null;
+            return gameState.grid[y][x];
+        }
+
+        // Helper function to count currently selected charged cores
+        function getSelectedChargedCoreCount() {
+            return gameState.selectedCells.filter(cell => cell.type === 'charged').length;
+        }
+
+        // Helper function to check if energy core has been placed this turn
+        function hasPlacedEnergyCore() {
+            return gameState.placedEnergyToken;
+        }
+
+        // Helper function to toggle cell selection
+        function toggleCellSelection(cell, x, y) {
+            if (cell.selected) {
+                deselectCell(cell, x, y);
+            } else if (!cell.token) {
+                selectCell(cell, x, y);
+            }
+        }
+
+        // Helper function to deselect a cell
+        function deselectCell(cell, x, y) {
+            const index = gameState.selectedCells.findIndex(
+                selected => selected.x === x && selected.y === y
+            );
+            
+            if (index !== -1) {
+                const deselectedCell = gameState.selectedCells[index];
+                
+                if (deselectedCell.type === 'charged') {
+                    gameState.players[gameState.currentPlayer].chargedCores.push(2);
+                    updatePlayerCards();
+                } else if (deselectedCell.type === 'energy') {
+                    gameState.placedEnergyToken = false;
+                }
+                
+                gameState.selectedCells.splice(index, 1);
+            }
+            
+            cell.selected = false;
+        }
+
+        // Helper function to select a cell
+        function selectCell(cell, x, y) {
+            const tokenType = gameState.selectedCells.length === 0 ? 'energy' : 'charged';
+            
+            if (tokenType === 'charged') {
+                if (!canPlaceChargedCore()) {
+                    return false;
+                }
+                
+                // Remove one charged core and update UI
+                gameState.players[gameState.currentPlayer].chargedCores.pop();
+                updatePlayerCards();
+                updateGameStatus("Charged core selected");
+            } else {
+                if (!canPlaceEnergyCore()) {
+                    return false;
+                }
+                
+                gameState.placedEnergyToken = true;
+                updateGameStatus("Energy core selected");
+            }
+            
+            cell.selected = true;
+            gameState.selectedCells.push({ x, y, type: tokenType });
+            addSelectionParticles(x, y);
+            return true;
+        }
+
+        // Helper function to check if a charged core can be placed
+        function canPlaceChargedCore() {
+            if (gameState.players[gameState.currentPlayer].chargedCores.length === 0) {
+                updateGameStatus("No charged cores available!", true);
+                setTimeout(() => updateGameStatus("Game in progress..."), 2000);
+                return false;
+            }
+            
+            //const usedChargedCores = getSelectedChargedCoreCount();
+            if (0 == gameState.players[gameState.currentPlayer].chargedCores.length) {
+                updateGameStatus("All available charged cores have been used!", true);
+                setTimeout(() => updateGameStatus("Game in progress..."), 2000);
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Helper function to check if an energy core can be placed
+        function canPlaceEnergyCore() {
+            if (!hasPlacedEnergyCore()) {
+                return true;
+            }
+            
+            updateGameStatus("You can only place one energy core per turn!", true);
+            setTimeout(() => updateGameStatus("Game in progress..."), 2000);
+            return false;
+        }
+
+        // Refactored handleCanvasClick function
         function handleCanvasClick(event) {
             if (!gameReadyToRender || gameState.turnPhase !== 'selecting' || gameState.gameOver) {
                 updateGameStatus(gameState.gameOver ? "Game is over!" : "Cannot select during animations");
                 return;
             }
             
-            const rect = canvas.getBoundingClientRect();
-            const clickX = event.clientX - rect.left;
-            const clickY = event.clientY - rect.top;
-            
-            const x = Math.floor(clickX / cellSize);
-            const y = Math.floor(clickY / cellSize);
-            
-            if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
-                try {
-                    const cell = gameState.grid[y][x];
-                    if (!cell) return;
-                    
-                    if (cell.selected) {
-                        // Deselect cell
-                        const index = gameState.selectedCells.findIndex(
-                            selected => selected.x === x && selected.y === y
-                        );
-                        
-                        if (index !== -1) {
-                            const deselectedCell = gameState.selectedCells[index];
-                            
-                            if (deselectedCell.type === 'charged') {
-                                gameState.players[gameState.currentPlayer].chargedCores.push(2);
-                                updatePlayerCards();
-                            } else if (deselectedCell.type === 'energy') {
-                                gameState.placedEnergyToken = false;
-                            }
-                            
-                            gameState.selectedCells.splice(index, 1);
-                        }
-                        
-                        cell.selected = false;
-                    } else if (!cell.token) {
-                        // Select empty cell
-                        const tokenType = gameState.selectedCells.length === 0 ? 'energy' : 'charged';
-                        
-                        if (tokenType === 'charged') {
-                            if (gameState.players[gameState.currentPlayer].chargedCores.length === 0) {
-                                updateGameStatus("No charged cores available!", true);
-                                setTimeout(() => updateGameStatus("Game in progress..."), 2000);
-                                return;
-                            }
-                            
-                            // Check if we've already used all available charged cores
-                            const usedChargedCores = gameState.selectedCells.filter(cell => cell.type === 'charged').length;
-                            if (usedChargedCores > gameState.players[gameState.currentPlayer].chargedCores.length) {
-                                updateGameStatus("All available charged cores have been used!", true);
-                                setTimeout(() => updateGameStatus("Game in progress..."), 2000);
-                                return;
-                            }
-                            
-                            // Remove one charged core and update UI
-                            gameState.players[gameState.currentPlayer].chargedCores.pop();
-                            updatePlayerCards();
-                            updateGameStatus("Charged core selected");
-                        } else {
-                            // Energy core placement
-                            if (!gameState.placedEnergyToken) {
-                                gameState.placedEnergyToken = true;
-                                updateGameStatus("Energy core selected");
-                            } else {
-                                updateGameStatus("You can only place one energy core per turn!", true);
-                                setTimeout(() => updateGameStatus("Game in progress..."), 2000);
-                                return;
-                            }
-                        }
-                        
-                        cell.selected = true;
-                        gameState.selectedCells.push({ x, y, type: tokenType });
-                        addSelectionParticles(x, y);
-                    } else {
-                        updateGameStatus("Cell already occupied");
-                    }
-                    
-                    render();
-                } catch (error) {
-                    console.error("Error handling grid click:", error);
-                    updateGameStatus("Error processing selection", true);
+            try {
+                const { x, y } = getClickCoordinates(event);
+                const cell = getClickedCell(x, y);
+                
+                if (!cell) {
+                    updateGameStatus("Click outside grid bounds");
+                    return;
                 }
-            } else {
-                updateGameStatus("Click outside grid bounds");
+                
+                if (cell.token) {
+                    updateGameStatus("Cell already occupied");
+                    return;
+                }
+                
+                toggleCellSelection(cell, x, y);
+                render();
+                
+            } catch (error) {
+                console.error("Error handling grid click:", error);
+                updateGameStatus("Error processing selection", true);
             }
         }
 
