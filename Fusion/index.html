@@ -708,20 +708,11 @@
         let gameReadyToRender = false;
         
         // Debug mode
-        const DEBUG = true;
+        const DEBUG = false; // Changed to false to reduce logging
         
         function debug(message) {
             if (DEBUG) {
                 console.log(message);
-                // Safely try to update game status
-                try {
-                    const statusElement = document.getElementById('gameStatus');
-                    if (statusElement) {
-                        statusElement.textContent = message;
-                    }
-                } catch (e) {
-                    console.log("Could not update status element: " + e.message);
-                }
             }
         }
         
@@ -901,26 +892,11 @@
 
         // Handle canvas click events
         function handleCanvasClick(event) {
-            console.log("\n[DEBUG - CLICK] ========== Canvas Click Event ==========");
-            console.log("[DEBUG - CLICK] Current charged tokens - P1:", gameState.players[0].chargedCores.length, "P2:", gameState.players[1].chargedCores.length);
-            console.log("[DEBUG - CLICK] Current player:", gameState.currentPlayer + 1);
-            console.log("[DEBUG - CLICK] Selected cells count:", gameState.selectedCells.length);
-            console.log("[DEBUG - CLICK] Energy token placed:", gameState.placedEnergyToken);
-            
-            // Safety checks
-            if (!gameReadyToRender) {
-                console.log("[DEBUG - CLICK] Game not ready for interaction");
-                updateGameStatus("Game still initializing...");
-                return;
-            }
-            
-            if (gameState.turnPhase !== 'selecting' || gameState.gameOver) {
-                console.log("[DEBUG - CLICK] Turn phase or game state prevents selection");
+            if (!gameReadyToRender || gameState.turnPhase !== 'selecting' || gameState.gameOver) {
                 updateGameStatus(gameState.gameOver ? "Game is over!" : "Cannot select during animations");
                 return;
             }
             
-            // Get grid coordinates from click position
             const rect = canvas.getBoundingClientRect();
             const clickX = event.clientX - rect.left;
             const clickY = event.clientY - rect.top;
@@ -928,120 +904,71 @@
             const x = Math.floor(clickX / cellSize);
             const y = Math.floor(clickY / cellSize);
             
-            console.log(`[DEBUG - CLICK] Grid position clicked: (${x}, ${y})`);
-            
-            // Check if click is within grid
             if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
                 try {
                     const cell = gameState.grid[y][x];
-                    if (!cell) {
-                        console.error(`[DEBUG - CLICK] Cell at (${x}, ${y}) is undefined!`);
-                        return;
-                    }
+                    if (!cell) return;
                     
-                    console.log(`[DEBUG - CLICK] Cell state: occupied=${cell.token ? 'yes' : 'no'}, selected=${cell.selected}`);
-                    
-                    // Toggle selection
                     if (cell.selected) {
-                        console.log("[DEBUG - CLICK] Deselecting cell");
-                        
-                        // Find the cell in selectedCells
+                        // Deselect cell
                         const index = gameState.selectedCells.findIndex(
                             selected => selected.x === x && selected.y === y
                         );
                         
                         if (index !== -1) {
                             const deselectedCell = gameState.selectedCells[index];
-                            console.log(`[DEBUG - CLICK] Found cell to deselect at index ${index}`);
                             
-                            // Only modify charged count if deselecting a charged core
                             if (deselectedCell.type === 'charged') {
-                                const oldCount = gameState.players[gameState.currentPlayer].chargedCores.length;
-                                // Return the charged core to the player's count
                                 gameState.players[gameState.currentPlayer].chargedCores.push(2);
-                                console.log(`[DEBUG - CLICK] Returned charged core to player ${gameState.currentPlayer + 1}, count: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedCores.length}`);
                                 updatePlayerCards();
                             } else if (deselectedCell.type === 'energy') {
-                                // If deselecting energy core, update the flag
                                 gameState.placedEnergyToken = false;
-                                console.log("[DEBUG - CLICK] Energy token deselected, placedEnergyToken set to false");
                             }
                             
-                            // Remove from selectedCells
                             gameState.selectedCells.splice(index, 1);
-                            console.log("[DEBUG - CLICK] Cell removed from selectedCells, new count:", gameState.selectedCells.length);
                         }
                         
-                        // Deselect the cell
                         cell.selected = false;
                     } else if (!cell.token) {
-                        // Select only if cell is empty
-                        console.log("[DEBUG - CLICK] Attempting to select empty cell");
+                        // Select empty cell
+                        const availableChargedCores = gameState.players[gameState.currentPlayer].chargedCores.length;
                         
-                        // Check if exceeding max selections
-                        const maxSelections = 1 + gameState.players[gameState.currentPlayer].chargedCores.length;
-                        console.log(`[DEBUG - CLICK] Max selections allowed: ${maxSelections}, current selections: ${gameState.selectedCells.length}`);
-                        
-                        if (gameState.selectedCells.length + 1 > maxSelections) {
-                            console.log(`[DEBUG - CLICK] Cannot select more than ${maxSelections} cells`);
-                            updateGameStatus(`Cannot place more than ${maxSelections} cores in one turn!`, true);
-                            setTimeout(() => {
-                                updateGameStatus("Game in progress...");
-                            }, 2000);
+                        if (availableChargedCores && !gameState.placedEnergyToken) {
+                            updateGameStatus(`All available charged cores have been used!`, true);
+                            setTimeout(() => updateGameStatus("Game in progress..."), 2000);
                             return;
                         }
                         
-                        // Determine token type based on selection count
                         const tokenType = gameState.selectedCells.length === 0 ? 'energy' : 'charged';
-                        console.log(`[DEBUG - CLICK] Token type for selection: ${tokenType}`);
                         
-                        // If trying to place a charged token when none are available
                         if (tokenType === 'charged' && gameState.players[gameState.currentPlayer].chargedCores.length === 0) {
-                            console.log("[DEBUG - CLICK] No charged cores available");
                             updateGameStatus("No charged cores available!", true);
-                            setTimeout(() => {
-                                updateGameStatus("Game in progress...");
-                            }, 2000);
+                            setTimeout(() => updateGameStatus("Game in progress..."), 2000);
                             return;
                         }
                         
-                        // Update energy token placement flag
                         if (tokenType === 'energy') {
                             gameState.placedEnergyToken = true;
-                            console.log("[DEBUG - CLICK] Energy token selected, placedEnergyToken set to true");
                             updateGameStatus("Energy core selected");
                         } else {
-                            const oldCount = gameState.players[gameState.currentPlayer].chargedCores.length;
-                            // Decrement charged core count when selecting a charged core
                             gameState.players[gameState.currentPlayer].chargedCores.pop();
-                            console.log(`[DEBUG - CLICK] Used charged core, player ${gameState.currentPlayer + 1} count: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedCores.length}`);
                             updatePlayerCards();
                             updateGameStatus("Charged core selected");
                         }
                         
                         cell.selected = true;
                         gameState.selectedCells.push({ x, y, type: tokenType });
-                        console.log(`[DEBUG - CLICK] Cell selected at (${x}, ${y}), type: ${tokenType}`);
-                        
-                        // Add selection particles
                         addSelectionParticles(x, y);
                     } else {
-                        console.log("[DEBUG - CLICK] Cell already occupied");
                         updateGameStatus("Cell already occupied");
                     }
                     
-                    // Force re-render
                     render();
-                    
-                    console.log("[DEBUG - CLICK] Final state - Charged tokens - P1:", gameState.players[0].chargedCores.length, "P2:", gameState.players[1].chargedCores.length);
-                    console.log("[DEBUG - CLICK] Selected cells:", gameState.selectedCells);
-                    console.log("[DEBUG - CLICK] ========== End Click Event ==========\n");
                 } catch (error) {
-                    console.error("[DEBUG - CLICK] Error handling grid click:", error);
+                    console.error("Error handling grid click:", error);
                     updateGameStatus("Error processing selection", true);
                 }
             } else {
-                console.log("[DEBUG - CLICK] Click outside grid bounds");
                 updateGameStatus("Click outside grid bounds");
             }
         }
@@ -1072,62 +999,32 @@
 
         // End the current turn
         function endTurn() {
-            console.log("\n========== TURN START ==========");
-            console.log(`Player ${gameState.currentPlayer + 1}'s turn`);
-            console.log(`Charged tokens - P1: ${gameState.players[0].chargedCores.length}, P2: ${gameState.players[1].chargedCores.length}`);
-            logBoardState("Initial ");
-            console.log("[DEBUG] End turn requested");
-            console.log("[DEBUG] Current charged tokens - P1:", gameState.players[0].chargedCores.length, "P2:", gameState.players[1].chargedCores.length);
-            
-            if (!gameReadyToRender) {
-                console.log("[DEBUG] Game not ready for turn end");
-                updateGameStatus("Game still initializing...");
-                return;
-            }
-            
-            if (gameState.turnPhase !== 'selecting' || gameState.gameOver) {
-                console.log("[DEBUG] Cannot end turn: phase =", gameState.turnPhase, "gameOver =", gameState.gameOver);
+            if (!gameReadyToRender || gameState.turnPhase !== 'selecting' || gameState.gameOver) {
                 updateGameStatus(gameState.gameOver ? "Game is over!" : "Cannot end turn during animations");
                 return;
             }
             
-            // Verify placed an energy token
             if (!gameState.placedEnergyToken) {
-                console.log("[DEBUG] No energy token placed");
                 updateGameStatus("You must place one energy core!", true);
-                setTimeout(() => {
-                    updateGameStatus("Game in progress...");
-                }, 2000);
+                setTimeout(() => updateGameStatus("Game in progress..."), 2000);
                 return;
             }
             
-            // Verify player has enough charged tokens
             const chargedCount = gameState.selectedCells.filter(cell => cell.type === 'charged').length;
-            console.log("[DEBUG] Attempting to place", chargedCount, "charged cores");
-            console.log("[DEBUG] Player", gameState.currentPlayer + 1, "has", gameState.players[gameState.currentPlayer].chargedCores.length, "charged cores available");
             
             try {
-                // Change phase to animation
                 gameState.turnPhase = 'animation';
-                console.log("[DEBUG] Turn phase changed to animation");
                 updateGameStatus("Processing turn...");
                 
-                // Place tokens on the grid
                 placeTokens();
-                console.log("[DEBUG] Tokens placed on grid");
-                console.log("[DEBUG] Current charged tokens - P1:", gameState.players[0].chargedCores.length, "P2:", gameState.players[1].chargedCores.length);
-                
-                // Reset energy token flag for next turn
                 gameState.placedEnergyToken = false;
                 
-                // Check for fusions and eliminations
-                console.log("[DEBUG] Scheduling core interactions processing");
                 setTimeout(() => {
                     processCoreInteractions();
                 }, 600);
             } catch (error) {
                 console.error("Error ending turn:", error);
-                gameState.turnPhase = 'selecting'; // Reset phase on error
+                gameState.turnPhase = 'selecting';
                 updateGameStatus("Error processing turn", true);
             }
         }
@@ -2570,6 +2467,59 @@
             }
         }
 
+        // Draw score update animation
+        function drawScoreUpdateAnimation(anim) {
+            const progress = anim.progress / anim.duration;
+            const playerCard = document.querySelector(`.player${anim.player + 1}`);
+            
+            if (!playerCard) return;
+            
+            const rect = playerCard.getBoundingClientRect();
+            const canvasRect = canvas.getBoundingClientRect();
+            
+            // Calculate position relative to canvas
+            const x = rect.left - canvasRect.left + rect.width / 2;
+            const y = rect.top - canvasRect.top + rect.height / 2;
+            
+            // Draw floating score text
+            const fontSize = 24 + progress * 12; // Grow from 24px to 36px
+            ctx.font = `bold ${fontSize}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Add glow effect
+            ctx.shadowColor = PLAYER_COLORS[anim.player];
+            ctx.shadowBlur = 10;
+            
+            // Draw the score value
+            ctx.fillStyle = 'white';
+            ctx.fillText(`+${anim.value}`, x, y - progress * 30); // Float up
+            
+            // Add particles
+            if (anim.progress % 3 === 0) {
+                for (let i = 0; i < 2; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 1 + Math.random() * 2;
+                    
+                    particles.push({
+                        x: x,
+                        y: y - progress * 30,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed - 1, // Slight upward bias
+                        radius: 2 + Math.random() * 3,
+                        color: PLAYER_COLORS[anim.player],
+                        alpha: 1 - progress,
+                        life: 20 + Math.random() * 10,
+                        maxLife: 30
+                    });
+                }
+            }
+            
+            // Reset shadow
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+        }
+
         // Draw particles
         function drawParticles() {
             try {
@@ -2590,7 +2540,6 @@
         function gameLoop() {
             try {
                 if (!gameReadyToRender) {
-                    console.log("Game not ready for loop, waiting...");
                     requestAnimationFrame(gameLoop);
                     return;
                 }
