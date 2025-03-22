@@ -35,24 +35,31 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            margin: 0;
+            box-sizing: border-box;
         }
 
         .game-container {
-            max-width: 1200px;
             width: 100%;
+            max-width: 1400px;
+            height: 90vh;
             background: radial-gradient(circle at center, #3a4e56, #23353B);
             border-radius: 15px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
             overflow: hidden;
             position: relative;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
         }
 
         .game-header {
             background: linear-gradient(135deg, var(--primary-color), #8a3236);
-            padding: 20px;
+            padding: 15px;
             text-align: center;
             position: relative;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .game-header::after {
@@ -74,7 +81,7 @@
         .game-header h1 {
             font-weight: 700;
             letter-spacing: 3px;
-            font-size: 2.8rem;
+            font-size: 2.4rem;
             margin-bottom: 5px;
             position: relative;
             text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.2);
@@ -89,18 +96,22 @@
 
         .game-content {
             display: flex;
-            flex-direction: column;
-            padding: 25px;
+            flex-direction: row;
+            padding: 20px;
             position: relative;
             z-index: 1;
+            gap: 20px;
+            flex: 1;
+            min-height: 0; /* Important for flex child */
         }
 
         /* Player cards */
         .player-cards {
             display: flex;
-            justify-content: space-around;
-            width: 100%;
-            margin-bottom: 30px;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 250px;
+            flex-shrink: 0;
             gap: 20px;
         }
 
@@ -109,12 +120,15 @@
             backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 20px;
-            width: 45%;
+            width: 100%;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .player-card.active {
@@ -183,8 +197,8 @@
         }
 
         .player-name {
-            font-size: 1.6rem;
-            margin-bottom: 20px;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
             position: relative;
             font-weight: 600;
             letter-spacing: 1px;
@@ -217,10 +231,10 @@
         }
 
         .stat-value {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: bold;
             line-height: 1;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             position: relative;
         }
 
@@ -329,23 +343,28 @@
 
         /* Game board */
         .game-board-container {
-            width: 100%;
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 20px 0;
+            margin: 0;
             position: relative;
+            min-width: 0;
+            height: 100%;
         }
 
         .game-board {
-            width: min(600px, 100%);
-            aspect-ratio: 1 / 1;
+            width: 100%;
+            height: 100%;
+            max-width: 800px;
+            max-height: 800px;
             border-radius: 15px;
             overflow: hidden;
             background-color: var(--grid-color);
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.4), 
                         inset 0 0 20px rgba(0, 0, 0, 0.6);
             position: relative;
+            aspect-ratio: 1;
         }
 
         #gameCanvas {
@@ -356,12 +375,16 @@
 
         /* Game controls */
         .game-controls {
-            width: 100%;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            margin-top: 30px;
-            flex-wrap: wrap;
+            z-index: 2;
+            gap: 15px;
         }
 
         .token-selection {
@@ -426,6 +449,7 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             position: relative;
             overflow: hidden;
+            min-width: 150px;
         }
 
         .end-turn-btn:hover {
@@ -459,19 +483,30 @@
         /* Game info */
         .game-info {
             background: rgba(0, 0, 0, 0.2);
-            padding: 20px;
+            padding: 15px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .turn-info, .game-status {
             font-size: 1.1rem;
             font-weight: 300;
+            flex: 1;
+            min-width: 200px;
         }
 
-        .help-btn {
+        .game-info-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .help-btn, .end-turn-btn {
             background-color: var(--tertiary-color);
             color: var(--background-color);
             border: none;
@@ -481,12 +516,21 @@
             font-weight: bold;
             transition: all 0.3s ease;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            white-space: nowrap;
         }
 
-        .help-btn:hover {
+        .help-btn:hover, .end-turn-btn:hover {
             background-color: #e9b849;
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .end-turn-btn {
+            background: linear-gradient(45deg, var(--primary-color), #d63d42);
+        }
+
+        .end-turn-btn:hover {
+            background: linear-gradient(45deg, #FF7175, #c83639);
         }
 
         /* Modal styles */
@@ -571,28 +615,54 @@
         }
 
         /* Responsive adjustments */
-        @media (max-width: 768px) {
+        @media (max-width: 1200px) {
+            .game-container {
+                height: 95vh;
+            }
+            
             .player-cards {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-content {
                 flex-direction: column;
+                padding: 10px;
+            }
+            
+            .player-cards {
+                width: 100%;
+                flex-direction: row;
+                height: 200px;
+                margin-bottom: 20px;
             }
             
             .player-card {
+                width: 45%;
+                height: 100%;
+                margin: 0 2.5%;
+            }
+            
+            .game-board-container {
                 width: 100%;
-                margin-bottom: 15px;
+                height: 400px;
+            }
+            
+            .game-board {
+                width: 100%;
+                height: 100%;
+                max-width: none;
+                max-height: none;
             }
             
             .game-controls {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .token-selection {
-                width: 100%;
-                justify-content: center;
+                display: none; /* Hide the old controls container */
             }
             
             .end-turn-btn {
-                width: 100%;
+                width: auto;
+                margin-left: 15px;
             }
         }
     </style>
@@ -615,8 +685,8 @@
                 </div>
             </div>
             
-        <div class="game-controls">
-                <button id="endTurnBtn" class="end-turn-btn">End Turn</button>
+            <div class="game-controls">
+                <!-- End turn button moved to game info -->
             </div>
         </div>
         
@@ -627,7 +697,10 @@
             <div class="game-status">
                 <p id="gameStatus">Game in progress...</p>
             </div>
-            <button class="help-btn" id="helpBtn">How to Play</button>
+            <div class="game-info-buttons">
+                <button class="help-btn" id="helpBtn">How to Play</button>
+                <button class="end-turn-btn" id="endTurnBtn">End Turn</button>
+            </div>
         </div>
     </div>
 
@@ -1364,6 +1437,8 @@
                         return parseInt(adjTokenParts[1]) === player;
                     });
                     
+                    console.log(`Checking fusions for core at (${newCore.x}, ${newCore.y}) - Found ${sameCores.length} adjacent friendly cores`);
+                    
                     // If we found adjacent cores of the same player, create a fusion
                     if (sameCores.length > 0) {
                         // Start BFS from this newly placed core to find all connected cores
@@ -1395,6 +1470,8 @@
                             });
                         }
                         
+                        console.log(`Found ${fusionCells.length} connected cores for fusion`);
+                        
                         // If we found more than one cell (the newly placed one plus at least one existing)
                         if (fusionCells.length > 1) {
                             // Calculate total value
@@ -1412,6 +1489,8 @@
                                     hasChargedCore = true;
                                 }
                             });
+                            
+                            console.log(`Creating fusion with total value ${totalValue}`);
                             
                             fusions.push({
                                 cells: fusionCells,
@@ -1686,7 +1765,6 @@
                 { dx: -1, dy: 0 },  // left
                 { dx: 0, dy: 1 },   // down
                 { dx: 0, dy: -1 }   // up
-                // Removed diagonal directions as requested
             ];
 
             directions.forEach(dir => {
@@ -1694,8 +1772,10 @@
                 const ny = y + dir.dy;
 
                 if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
+                    const cell = gameState.grid[ny][nx];
+                    console.log(`Checking adjacent cell at (${nx}, ${ny}): ${cell.token || 'empty'}`);
                     adjacentCells.push({
-                        cell: gameState.grid[ny][nx],
+                        cell: cell,
                         x: nx,
                         y: ny
                     });

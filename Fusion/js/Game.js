@@ -58,11 +58,13 @@ export class Game {
         }
 
         const rect = this.canvas.getBoundingClientRect();
-        const x = Math.floor((event.clientX - rect.left) / this.renderer.cellSize);
-        const y = Math.floor((event.clientY - rect.top) / this.renderer.cellSize);
+        const x = Math.floor((event.clientX - rect.left + 0.5) / this.renderer.cellSize);
+        const y = Math.floor((event.clientY - rect.top + 0.5) / this.renderer.cellSize);
 
-        if (this.rules.canPlaceToken(this.gameState, x, y)) {
-            this.handleTokenPlacement(x, y);
+        if (x >= 0 && x < this.gameState.grid.size && y >= 0 && y < this.gameState.grid.size) {
+            if (this.rules.canPlaceToken(this.gameState, x, y)) {
+                this.handleTokenPlacement(x, y);
+            }
         }
     }
 
