@@ -9,11 +9,54 @@ export class GameRenderer {
         this.resizeCanvas();
     }
 
+    /**
+     * Converts screen coordinates to grid coordinates with high precision
+     * @param {number} screenX - X coordinate from click event
+     * @param {number} screenY - Y coordinate from click event
+     * @returns {{x: number, y: number} | null} Grid coordinates or null if invalid
+     */
+    screenToGridCoordinates(screenX, screenY) {
+        try {
+            const rect = this.canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            // Convert screen coordinates to canvas coordinates, accounting for DPR
+            const canvasX = (screenX - rect.left) * (this.canvas.width / (rect.width * dpr));
+            const canvasY = (screenY - rect.top) * (this.canvas.height / (rect.height * dpr));
+            
+            // Convert to grid coordinates with precise rounding
+            const x = Math.floor(canvasX / this.cellSize);
+            const y = Math.floor(canvasY / this.cellSize);
+            
+            // Validate coordinates are within grid bounds
+            if (x < 0 || x >= 8 || y < 0 || y >= 8) {
+                return null;
+            }
+            
+            return { x, y };
+        } catch (error) {
+            console.error('Error converting screen coordinates to grid:', error);
+            return null;
+        }
+    }
+
     resizeCanvas() {
         const container = this.canvas.parentElement;
         const size = Math.min(container.clientWidth, container.clientHeight);
-        this.canvas.width = size;
-        this.canvas.height = size;
+        const dpr = window.devicePixelRatio || 1;
+        
+        // Set the canvas size in CSS pixels
+        this.canvas.style.width = `${size}px`;
+        this.canvas.style.height = `${size}px`;
+        
+        // Set the canvas size in actual pixels
+        this.canvas.width = size * dpr;
+        this.canvas.height = size * dpr;
+        
+        // Scale the context to account for DPR
+        this.ctx.scale(dpr, dpr);
+        
+        // Calculate cell size in CSS pixels
         this.cellSize = size / 8; // Assuming 8x8 grid
     }
 
