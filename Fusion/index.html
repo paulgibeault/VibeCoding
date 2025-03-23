@@ -966,8 +966,11 @@
         // Helper function to get click coordinates relative to canvas
         function getClickCoordinates(event) {
             const rect = canvas.getBoundingClientRect();
-            const clickX = event.clientX - rect.left;
-            const clickY = event.clientY - rect.top;
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const clickX = (event.clientX - rect.left) * scaleX;
+            const clickY = (event.clientY - rect.top) * scaleY;
             
             return {
                 x: Math.floor(clickX / cellSize),
