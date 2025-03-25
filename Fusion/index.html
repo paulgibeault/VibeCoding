@@ -341,38 +341,65 @@
             font-weight: bold;
         }
 
-        /* Game board */
+        /* Game board container - always maintain center alignment */
         .game-board-container {
-            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            margin: 0;
+            margin: 0 auto;
             position: relative;
-            min-width: 0;
-            height: 100%;
+            overflow: hidden; /* Prevent scrollbars during resize */
+            /* Remove explicit flex sizing to allow container to match grid size */
         }
 
+        /* Game board - enforce square aspect ratio */
         .game-board {
             width: 100%;
             height: 100%;
-            max-width: 800px;
-            max-height: 800px;
             border-radius: 15px;
             overflow: hidden;
             background-color: var(--grid-color);
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.4), 
                         inset 0 0 20px rgba(0, 0, 0, 0.6);
             position: relative;
-            aspect-ratio: 1;
+            aspect-ratio: 1/1; /* Enforce 1:1 aspect ratio */
         }
 
+        /* Canvas should always maintain square proportions */
         #gameCanvas {
             width: 100%;
             height: 100%;
             cursor: pointer;
+            display: block; /* Remove any inline spacing */
         }
 
+        /* Media queries for responsive layout while keeping the grid square */
+        @media (max-width: 768px) {
+            .game-content {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .player-cards {
+                width: 100%;
+                flex-direction: row;
+                max-height: 200px;
+                margin-bottom: 20px;
+            }
+            
+            .game-board-container {
+                width: 90vw; /* Use viewport width for mobile */
+                height: auto;
+                max-width: 90vw;
+                margin: 0 auto;
+            }
+            
+            .game-board {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 1/1;
+            }
+        }
         /* Game controls */
         .game-controls {
             position: absolute;
@@ -831,19 +858,45 @@
             debug(`Grid initialized with size ${GRID_SIZE}x${GRID_SIZE}`);
         }
 
-        // Resize canvas to maintain aspect ratio
-        function resizeCanvas() {
+        // Resize canvas to maintain a perfect square
+        function resizeCanvas(shouldRender = true) {
             try {
-                const container = canvas.parentElement;
-                const size = Math.min(container.clientWidth, container.clientHeight);
+                const gameContent = document.querySelector('.game-content');
+                const boardContainer = canvas.parentElement.parentElement;
+                
+                // Get the available space in the game content area
+                const availableWidth = gameContent.clientWidth - document.querySelector('.player-cards').offsetWidth - 40; // 40px for padding/margins
+                const availableHeight = gameContent.clientHeight - 40; // 40px for padding
+                
+                // Always take the minimum dimension to ensure a perfect square
+                const size = Math.min(availableWidth, availableHeight);
+                
+                // Set both dimensions to the same value to ensure a square
                 canvas.width = size;
                 canvas.height = size;
-                cellSize = size / GRID_SIZE;
                 
+                // Update cellSize based on the new dimensions
+                cellSize = size / GRID_SIZE;
+
                 debug(`Canvas resized to ${size}x${size}, cell size: ${cellSize}`);
                 
-                // Re-render after resize
-                render();
+                // Apply CSS to ensure the canvas is visually square and the container matches
+                canvas.style.width = `${size}px`;
+                canvas.style.height = `${size}px`;
+                
+                // Also size the game board and container to match the canvas
+                const gameBoard = canvas.parentElement;
+                gameBoard.style.width = `${size}px`;
+                gameBoard.style.height = `${size}px`;
+                
+                // Size the container to match the game board
+                boardContainer.style.width = `${size}px`;
+                boardContainer.style.height = `${size}px`;
+                
+                // Re-render after resize if shouldRender is true
+                if (shouldRender) {
+                    render();
+                }
             } catch (error) {
                 debug("Error resizing canvas: " + error.message);
                 console.error(error);
@@ -2753,7 +2806,7 @@
                 console.log("Player cards created successfully");
                 
                 // Resize canvas (but don't render yet)
-                resizeCanvasWithoutRendering();
+                resizeCanvas(false);
                 console.log("Canvas resized without rendering");
                 
                 // Set up all event listeners directly
@@ -2820,22 +2873,7 @@
                 console.error("Error setting up event listeners:", error);
             }
         }
-        
-        // Resize canvas without triggering render
-        function resizeCanvasWithoutRendering() {
-            try {
-                const container = canvas.parentElement;
-                const size = Math.min(container.clientWidth, container.clientHeight);
-                canvas.width = size;
-                canvas.height = size;
-                cellSize = size / GRID_SIZE;
                 
-                console.log(`Canvas resized to ${size}x${size}, cell size: ${cellSize}`);
-            } catch (error) {
-                console.error("Error resizing canvas:", error);
-            }
-        }
-        
         // Use both initialization methods with window.onload as primary for full reliability
         window.onload = init;
 
