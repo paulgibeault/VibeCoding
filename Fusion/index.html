@@ -140,6 +140,78 @@
             flex-direction: column;
         }
 
+        .player-card .player-stats {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .player-card .player-stats .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .player-card .player-stats .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .player-card .player-stats .stat-label {
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .player-card .energy-container {
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(42, 61, 69, 0.7);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-card .energy-container .energy-slots {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .player-card .energy-container .energy-slot {
+            width: 10px;
+            height: 10px;
+            background: #ccc;
+            border-radius: 50%;
+            margin: 0 5px;
+        }
+
+        .player-card .energy-container .energy-count {
+            font-size: 14px;
+            color: #ccc;
+            margin-left: 10px;
+        }
+
+        .player-card.active {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 
+                        0 0 25px var(--player1-glow);
+            border: 2px solid var(--player1-color);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(5px);
+            }
+            100% {
+                transform: translateX(0);
+            }
+        }
         /* Clearer active state styling for player cards */
         .player1.active {
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 
@@ -723,7 +795,21 @@
         
         <div class="game-content">
             <div class="player-cards">
-                <!-- Player cards will be dynamically generated here -->
+                <div class="player-card">
+                    <h2 class="player-name">{{ player.name }}</h2>
+                    <div class="player-stats">
+                        <div class="stat">
+                            <div class="stat-value">{{ player.score }}</div>
+                            <div class="stat-label">Score</div>
+                        </div>
+                        <div class="energy-container">
+                            <div class="energy-slots">
+                                {{ Array(player.maxChargedCores).fill('<div class="energy-slot"></div>').join('') }}
+                            </div>
+                            <div class="energy-count">0/{{ player.maxChargedCores }}</div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="game-board-container">
