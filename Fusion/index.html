@@ -105,113 +105,62 @@
             min-height: 0; /* Important for flex child */
         }
 
-        /* Player cards */
+        /* Player Cards - Base Styles */
         .player-cards {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             width: 250px;
+            min-width: 250px;
             flex-shrink: 0;
-            gap: 20px;
+            gap: 15px;
         }
 
+        Player Card Styling and Update Fixes
+
+        // Fix 1: Consistent CSS for player cards
+        // Add this to your CSS section (inside the <style> tag)
+
+        /* Player Card Fixes */
         .player-card {
-            background: rgba(42, 61, 69, 0.7);
-            backdrop-filter: blur(10px);
+            background: rgba(42, 61, 69, 0.85);
+            backdrop-filter: blur(15px);
             border-radius: 15px;
             padding: 20px;
             width: 100%;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            min-height: 200px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), 
+                        0 2px 8px rgba(255, 255, 255, 0.1) inset;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.15);
             flex: 1;
             display: flex;
             flex-direction: column;
         }
 
-        .player-card.active {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        /* Clearer active state styling for player cards */
+        .player1.active {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 
+                        0 0 25px var(--player1-glow);
+            border: 2px solid var(--player1-color);
         }
 
-        .player-card.player1 {
-            background: linear-gradient(45deg, rgba(68, 41, 41, 0.7), rgba(58, 35, 35, 0.7));
-            border-left: 5px solid var(--player1-color);
+        .player2.active {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 
+                        0 0 25px var(--player2-glow);
+            border: 2px solid var(--player2-color);
         }
 
-        .player-card.player2 {
-            background: linear-gradient(45deg, rgba(34, 65, 63, 0.7), rgba(25, 53, 51, 0.7));
-            border-left: 5px solid var(--secondary-color);
-        }
-
-        .player-card.active::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, 
-                rgba(255,255,255,0) 0%, 
-                rgba(255,255,255,0.1) 50%, 
-                rgba(255,255,255,0) 100%);
-            animation: shine 2s infinite;
-        }
-
-        @keyframes shine {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        .turn-indicator {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-
-        .player1.active .turn-indicator {
-            background: radial-gradient(circle at center, var(--player1-color), #8a3236);
-            box-shadow: 0 0 15px 5px var(--player1-glow);
-            opacity: 1;
-            animation: pulse 1.5s infinite;
-        }
-
-        .player2.active .turn-indicator {
-            background: radial-gradient(circle at center, var(--secondary-color), #27918a);
-            box-shadow: 0 0 15px 5px var(--player2-glow);
-            opacity: 1;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(0.8); box-shadow: 0 0 15px 2px var(--player1-glow); }
-            50% { transform: scale(1.2); box-shadow: 0 0 25px 5px var(--player1-glow); }
-            100% { transform: scale(0.8); box-shadow: 0 0 15px 2px var(--player1-glow); }
-        }
-
+        /* Player card content styling */
         .player-name {
             font-size: 1.4rem;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             position: relative;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-
-        .player1 .player-name {
-            color: var(--player1-color);
-            text-shadow: 0 0 10px rgba(255, 90, 95, 0.5);
-        }
-
-        .player2 .player-name {
-            color: var(--secondary-color);
-            text-shadow: 0 0 10px rgba(62, 205, 193, 0.5);
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
         }
 
         .player-stats {
@@ -225,81 +174,64 @@
             flex: 1;
             position: relative;
             padding: 10px;
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 10px;
             margin: 0 5px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .stat-value {
             font-size: 2.2rem;
             font-weight: bold;
             line-height: 1;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             position: relative;
-        }
-
-        .player1 .stat-value {
-            color: var(--player1-color);
-            text-shadow: 0 0 8px rgba(255, 90, 95, 0.5);
-        }
-
-        .player2 .stat-value {
-            color: var(--secondary-color);
-            text-shadow: 0 0 8px rgba(62, 205, 193, 0.5);
         }
 
         .stat-label {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            color: #CCC;
-            letter-spacing: 1px;
-            font-weight: 300;
-        }
-
-        .energy-container {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            padding: 10px;
-            margin-top: 10px;
-            position: relative;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .energy-container::before {
-            content: "Energy Container";
-            position: absolute;
-            top: -12px;
-            left: 10px;
-            background: var(--background-color);
-            padding: 0 8px;
             font-size: 0.8rem;
-            color: var(--tertiary-color);
-            font-weight: bold;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Enhanced energy container styling */
+        .energy-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px 10px;
+            margin-top: 15px;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) inset;
+            transition: all 0.3s ease;
         }
 
         .energy-slots {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             justify-content: center;
             align-items: center;
             min-height: 40px;
         }
 
         .energy-slot {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.15);
             position: relative;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
             will-change: transform, opacity;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
         }
 
         .energy-slot.has-core {
             border-color: var(--tertiary-color);
-            box-shadow: 0 0 10px rgba(255, 200, 87, 0.3);
-            background: rgba(255, 200, 87, 0.2);
+            box-shadow: 0 0 15px rgba(255, 200, 87, 0.6);
+            background: rgba(255, 200, 87, 0.25);
             transform: scale(1.1);
         }
 
@@ -309,36 +241,124 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
-            background: var(--tertiary-color);
-            opacity: 1;
-            transition: all 0.3s ease;
+            background: linear-gradient(135deg, var(--tertiary-color), #e9b849);
+            box-shadow: 0 0 8px rgba(255, 200, 87, 0.8);
             z-index: 1;
         }
 
-        .energy-slot.full {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 10px rgba(255, 90, 95, 0.3);
-            background: rgba(255, 90, 95, 0.2);
-            transform: scale(1.1);
+        .energy-slot.has-core::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: white;
+            z-index: 2;
         }
 
-        .energy-slot.full::after {
-            background: var(--primary-color);
-            transform: translate(-50%, -50%) scale(1.2);
+        .player1 .energy-slot.has-core::before {
+            background: var(--player1-color);
+        }
+
+        .player2 .energy-slot.has-core::before {
+            background: var(--player2-color);
         }
 
         .energy-count {
             position: absolute;
-            bottom: -20px;
+            bottom: -16px;
             left: 50%;
             transform: translateX(-50%);
             font-size: 0.8rem;
             color: var(--text-color);
-            opacity: 0.8;
+            opacity: 0.9;
             font-weight: bold;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1px 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            letter-spacing: 0.5px;
+        }
+
+        /* Media queries with more specific selectors to avoid conflicts */
+        @media (max-width: 1200px) {
+            .game-content .player-cards {
+                width: 220px;
+                min-width: 220px;
+            }
+            
+            .player-cards .player-card {
+                min-height: 170px;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-content {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .game-content .player-cards {
+                width: 100%;
+                flex-direction: row;
+                height: 180px;
+                min-height: 180px;
+                margin-bottom: 20px;
+            }
+            
+            .player-cards .player-card {
+                width: 48%;
+                height: 100%;
+                margin: 0 1%;
+                min-height: unset;
+            }
+        }
+        /* Player card glow effect when active */
+        .player1.active {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 
+                        0 0 25px rgba(255, 90, 95, 0.2);
+        }
+
+        .player2.active {
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), 
+                        0 0 25px rgba(62, 205, 193, 0.2);
+        }
+
+        /* Media queries adjustments */
+        @media (max-width: 1200px) {
+            .player-cards {
+                width: 250px;
+                min-width: 250px;
+            }
+            
+            .player-card {
+                min-height: 200px;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .player-cards {
+                width: 100%;
+                flex-direction: row;
+                height: 220px; /* Increased from 200px */
+                min-height: 220px;
+                margin-bottom: 20px;
+            }
+            
+            .player-card {
+                width: 48%; /* Adjusted from 45% */
+                height: 100%;
+                margin: 0 1%;
+                min-height: unset;
+            }
         }
 
         /* Game board container - always maintain center alignment */
@@ -903,7 +923,7 @@
             }
         }
 
-        // Create player cards in the DOM
+        // Fix 2: Updated createPlayerCards function
         function createPlayerCards() {
             console.log("Creating player cards");
             
@@ -914,6 +934,7 @@
                 return;
             }
             
+            // Clear existing content
             playerCardsContainer.innerHTML = '';
             
             console.log("Player cards container found, creating cards");
@@ -926,7 +947,6 @@
                 }
                 
                 playerCard.innerHTML = `
-                    <div class="turn-indicator"></div>
                     <h2 class="player-name">${player.name}</h2>
                     <div class="player-stats">
                         <div class="stat">
@@ -936,86 +956,113 @@
                     </div>
                     <div class="energy-container">
                         <div class="energy-slots">
-                            <div class="energy-slot"></div>
-                            <div class="energy-slot"></div>
-                            <div class="energy-slot"></div>
-                            <div class="energy-slot"></div>
-                            <div class="energy-slot"></div>
+                            ${Array(player.maxChargedCores).fill('<div class="energy-slot"></div>').join('')}
                         </div>
-                        <div class="energy-count">0/5</div>
+                        <div class="energy-count">0/${player.maxChargedCores}</div>
                     </div>
                 `;
                 
                 playerCardsContainer.appendChild(playerCard);
-                console.log(`Player ${index + 1} card created`);
+                console.log(`Player ${index + 1} card created with ${player.maxChargedCores} energy slots`);
             });
             
-            console.log("All player cards created successfully");
-            
-            // Initialize energy containers
-            gameState.players.forEach((player, index) => {
-                updateEnergyContainer(index);
-            });
+            // Initialize energy containers with a slight delay to ensure DOM is ready
+            setTimeout(() => {
+                gameState.players.forEach((player, index) => {
+                    updateEnergyContainer(index);
+                });
+            }, 100);
         }
 
-        // Update player cards with current game state
+
+        // Fix 4: Enhanced updatePlayerCards function
         function updatePlayerCards() {
-            console.log("[DEBUG] Updating player cards");
-            console.log("[DEBUG] Player states before update - P1:", 
-                {score: gameState.players[0].score, charged: gameState.players[0].chargedCores.length},
-                "P2:", 
-                {score: gameState.players[1].score, charged: gameState.players[1].chargedCores.length}
-            );
+            console.log("Updating player cards");
             
-            const playerCardsContainer = document.querySelector('.player-cards');
+            // Update each player card independently
+            gameState.players.forEach((player, index) => {
+                const playerCard = document.querySelector(`.player-card.player${index + 1}`);
+                
+                if (!playerCard) {
+                    console.error(`Player ${index + 1} card not found!`);
+                    return;
+                }
+                
+                // Update score
+                const scoreValue = playerCard.querySelector('.stat-value');
+                if (scoreValue) {
+                    scoreValue.textContent = player.score;
+                }
+                
+                // Update active state
+                if (index === gameState.currentPlayer) {
+                    playerCard.classList.add('active');
+                } else {
+                    playerCard.classList.remove('active');
+                }
+                
+                // Update energy container separately
+                updateEnergyContainer(index);
+            });
             
-            if (!playerCardsContainer) {
-                console.error("[DEBUG] Player cards container not found!");
+            // Update the current player indicator in the UI
+            const currentPlayerElement = document.getElementById('currentPlayer');
+            if (currentPlayerElement) {
+                currentPlayerElement.textContent = gameState.players[gameState.currentPlayer].name;
+            }
+            
+            const gameStatusElement = document.getElementById('gameStatus');
+            if (gameStatusElement && gameState.turnPhase === 'selecting') {
+                gameStatusElement.textContent = `${gameState.players[gameState.currentPlayer].name}'s turn`;
+            }
+        }
+
+        // Fix 3: Improved updateEnergyContainer function
+        function updateEnergyContainer(playerIndex) {
+            const player = gameState.players[playerIndex];
+            console.log(`Updating energy container for Player ${playerIndex + 1}`);
+            console.log(`Current charged cores: ${player.chargedCores.length}/${player.maxChargedCores}`);
+            
+            const container = document.querySelector(`.player${playerIndex + 1} .energy-slots`);
+            const countDisplay = document.querySelector(`.player${playerIndex + 1} .energy-count`);
+            
+            if (!container || !countDisplay) {
+                console.error(`Could not find energy container elements for Player ${playerIndex + 1}`);
                 return;
             }
             
-            playerCardsContainer.innerHTML = '';
+            // Update slots - first ensure we have the correct number of slots
+            if (container.children.length !== player.maxChargedCores) {
+                container.innerHTML = Array(player.maxChargedCores).fill('<div class="energy-slot"></div>').join('');
+            }
             
-            gameState.players.forEach((player, index) => {
-                const playerCard = document.createElement('div');
-                playerCard.className = `player-card player${index + 1}`;
-                if (index === gameState.currentPlayer) {
-                    playerCard.classList.add('active');
-                }
-                
-                playerCard.innerHTML = `
-                    <div class="turn-indicator"></div>
-                    <h2 class="player-name">${player.name}</h2>
-                    <div class="player-stats">
-                        <div class="stat">
-                            <div class="stat-value">${player.score}</div>
-                            <div class="stat-label">Score</div>
-                        </div>
-                    </div>
-                    <div class="energy-container">
-                        <div class="energy-slots">
-                            <div class="energy-slot"></div>
-                            <div class="energy-slot"></div>
-                            <div class="energy-slot"></div>
-                            <div class="energy-slot"></div>
-                            <div class="energy-slot"></div>
-                        </div>
-                        <div class="energy-count">0/5</div>
-                    </div>
-                `;
-                
-                playerCardsContainer.appendChild(playerCard);
-                console.log(`[DEBUG] Updated card for Player ${index + 1} - Score: ${player.score}, Charged: ${player.chargedCores.length}`);
+            // Now update each slot's appearance
+            const slots = container.querySelectorAll('.energy-slot');
+            
+            // Clear all slots first
+            slots.forEach(slot => {
+                slot.classList.remove('has-core', 'full');
             });
             
-            console.log("[DEBUG] Player cards update complete");
+            // Set the appropriate slots to active
+            for (let i = 0; i < player.chargedCores.length && i < slots.length; i++) {
+                slots[i].classList.add('has-core');
+            }
             
-            // Initialize energy containers
-            gameState.players.forEach((player, index) => {
-                updateEnergyContainer(index);
-            });
+            // Add 'full' state if needed
+            if (player.chargedCores.length >= player.maxChargedCores) {
+                slots.forEach(slot => {
+                    if (slot.classList.contains('has-core')) {
+                        slot.classList.add('full');
+                    }
+                });
+            }
+            
+            // Update count display
+            countDisplay.textContent = `${player.chargedCores.length}/${player.maxChargedCores}`;
+            
+            console.log(`Updated energy display for Player ${playerIndex + 1}`);
         }
-
         // Helper function to get click coordinates relative to canvas
         function getClickCoordinates(event) {
             const rect = canvas.getBoundingClientRect();
@@ -2899,15 +2946,21 @@
             console.log("\n");
         }
 
-        // Add new functions for energy container management
+        // Fix 5: Improved addChargedCore function
         function addChargedCore(playerIndex, coreValue = 2) {
             const player = gameState.players[playerIndex];
+            
+            // Check if we can add more cores
             if (player.chargedCores.length >= player.maxChargedCores) {
-                console.log(`[DEBUG] Player ${playerIndex + 1}'s energy container is full`);
+                console.log(`Player ${playerIndex + 1}'s energy container is full`);
                 return false;
             }
             
+            // Add the core to the player's supply
             player.chargedCores.push(coreValue);
+            console.log(`Added charged core to Player ${playerIndex + 1} (now has ${player.chargedCores.length})`);
+            
+            // Update the visual display
             updateEnergyContainer(playerIndex);
             return true;
         }
