@@ -838,29 +838,6 @@
             gameState.selectionMode = mode;
             console.log(`Selection mode changed to: ${mode}`);
             updateGameStatus(`Selected ${mode} core placement mode`);
-            
-            try {
-                // Update UI to reflect current mode
-                const energyBtn = document.getElementById('energyTokenBtn');
-                const chargedBtn = document.getElementById('chargedTokenBtn');
-                
-                if (!energyBtn || !chargedBtn) {
-                    console.error("Energy or charged button not found in the DOM");
-                    return;
-                }
-                
-                if (mode === 'energy') {
-                    energyBtn.classList.add('active');
-                    chargedBtn.classList.remove('active');
-                } else {
-                    energyBtn.classList.remove('active');
-                    chargedBtn.classList.add('active');
-                }
-                
-                console.log("Button UI updated successfully");
-            } catch (error) {
-                console.error("Error updating selection mode UI:", error);
-            }
         }
 
         // Handle canvas click events
@@ -2094,11 +2071,7 @@
                         
                         // Draw token preview
                         ctx.globalAlpha = 0.7;
-                        if (gameState.selectionMode === 'energy') {
-                            drawEnergyToken(centerX, centerY, radius, gameState.currentPlayer);
-                        } else {
-                            drawChargedToken(centerX, centerY, radius, gameState.currentPlayer);
-                        }
+                        drawEnergyToken(centerX, centerY, radius, gameState.currentPlayer);
                         ctx.globalAlpha = 1.0;
                     }
                     
@@ -2108,11 +2081,7 @@
                         const tokenType = tokenParts[0];
                         const player = parseInt(tokenParts[1]);
                         
-                        if (tokenType === 'energy') {
-                            drawEnergyToken(centerX, centerY, radius, player, cell.glow);
-                        } else {
-                            drawChargedToken(centerX, centerY, radius, player, cell.glow);
-                        }
+                        drawEnergyToken(centerX, centerY, radius, player, cell.glow);
                         
                         // Draw token value (if defined)
                         if (cell.value && cell.value > 1) {
@@ -2379,11 +2348,7 @@
             }
             
             // Draw the token
-            if (anim.tokenType === 'energy') {
-                drawEnergyToken(centerX, centerY, radius, anim.player);
-            } else {
-                drawChargedToken(centerX, centerY, radius, anim.player);
-            }
+            drawEnergyToken(centerX, centerY, radius, anim.player);
         }
 
         // Draw fusion animation
@@ -2581,11 +2546,7 @@
                     const offsetY = (Math.random() * 2 - 1) * shakeAmount;
                     
                     // Draw with increasing glow
-                    if (tokenType === 'energy') {
-                        drawEnergyToken(centerX + offsetX, centerY + offsetY, cellSize * 0.4, player, beamProgress);
-                    } else {
-                        drawChargedToken(centerX + offsetX, centerY + offsetY, cellSize * 0.4, player, beamProgress);
-                    }
+                    drawEnergyToken(centerX + offsetX, centerY + offsetY, cellSize * 0.4, player, beamProgress);
                 } else {
                     // Explosion effect for the elimination
                     const explosionProgress = (progress - 0.7) / 0.3;
