@@ -178,14 +178,14 @@
             transition: all 0.3s ease;
         }
 
-        .player1.active .turn-indicator {
+        .player1.active.turn-indicator {
             background: radial-gradient(circle at center, var(--player1-color), #8a3236);
             box-shadow: 0 0 15px 5px var(--player1-glow);
             opacity: 1;
             animation: pulse 1.5s infinite;
         }
 
-        .player2.active .turn-indicator {
+        .player2.active.turn-indicator {
             background: radial-gradient(circle at center, var(--secondary-color), #27918a);
             box-shadow: 0 0 15px 5px var(--player2-glow);
             opacity: 1;
@@ -206,12 +206,12 @@
             letter-spacing: 1px;
         }
 
-        .player1 .player-name {
+        .player1.player-name {
             color: var(--player1-color);
             text-shadow: 0 0 10px rgba(255, 90, 95, 0.5);
         }
 
-        .player2 .player-name {
+        .player2.player-name {
             color: var(--secondary-color);
             text-shadow: 0 0 10px rgba(62, 205, 193, 0.5);
         }
@@ -239,12 +239,12 @@
             position: relative;
         }
 
-        .player1 .stat-value {
+        .player1.stat-value {
             color: var(--player1-color);
             text-shadow: 0 0 8px rgba(255, 90, 95, 0.5);
         }
 
-        .player2 .stat-value {
+        .player2.stat-value {
             color: var(--secondary-color);
             text-shadow: 0 0 8px rgba(62, 205, 193, 0.5);
             }
@@ -408,7 +408,7 @@
             color: var(--text-color);
         }
 
-        .modal.visible .modal-content {
+        .modal.visible, .modal-content {
             transform: translateY(0);
             opacity: 1;
         }
