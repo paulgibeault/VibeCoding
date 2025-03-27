@@ -105,6 +105,21 @@
             gap: 5px;
         }
 
+        .charged-cores {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .charged-core-icon {
+            width: 20px;
+            height: 20px;
+            margin: 0 5px;
+            background-color: var(--secondary-color);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
         .player-card {
             background: rgba(42, 61, 69, 0.7);
             backdrop-filter: blur(10px);
@@ -741,13 +756,12 @@
                             <div class="stat-value">${player.score}</div>
                             <div class="stat-label">Score</div>
                         </div>
-                        <div class="stat">
-                            <div class="stat-value">${player.chargedTokens}</div>
-                            <div class="stat-label">Charged</div>
-                        </div>
+                    </div>
+                    <div class="charged-cores">
+                        ${Array(player.chargedTokens).fill().map(() => '<i class="charged-core-icon"></i>').join('')}
                     </div>
                 `;
-                
+
                 playerCardsContainer.appendChild(playerCard);
                 console.log(`Player ${index + 1} card created`);
             });
@@ -788,10 +802,9 @@
                             <div class="stat-value">${player.score}</div>
                             <div class="stat-label">Score</div>
                         </div>
-                        <div class="stat">
-                            <div class="stat-value">${player.chargedTokens}</div>
-                            <div class="stat-label">Charged</div>
-                        </div>
+                    </div>
+                    <div class="charged-cores">
+                        ${Array(player.chargedTokens).fill().map(() => '<i class="charged-core-icon"></i>').join('')}
                     </div>
                 `;
                 
