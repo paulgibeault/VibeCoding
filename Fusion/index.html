@@ -335,7 +335,25 @@
             20% { left: 100%; }
             100% { left: 100%; }
         }
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
 
+        .setting-row label {
+            font-weight: bold;
+        }
+
+        .setting-row input[type="number"] {
+            width: 60px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+        
         /* Game info */
         .game-info {
             background: rgba(0, 0, 0, 0.2);
@@ -477,6 +495,28 @@
     </style>
 </head>
 <body>
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <span class="modal-close" id="closeSettingsModal">×</span>
+            <h2 class="modal-title">Game Settings</h2>
+            <div class="modal-body">
+                <div class="setting-row">
+                    <label for="startingChargedCores">Starting Charged Cores:</label>
+                    <input type="number" id="startingChargedCores" min="0" value="1">
+                </div>
+                <div class="setting-row">
+                    <label for="chargedCoreValue">Charged Core Value:</label>
+                    <input type="number" id="chargedCoreValue" min="1" value="3">
+                </div>
+                 <div class="setting-row">
+                    <label for="winningScore">Winning Score:</label>
+                    <input type="number" id="winningScore" min="10" value="20">
+                </div>
+                <button id="applySettingsBtn" class="end-turn-btn">Apply Settings & New Game</button>
+            </div>
+        </div>
+    </div>
+    
     <div class="game-container">
         <div class="game-header">
             <h1>ENERGY GRID</h1>
@@ -506,6 +546,7 @@
             <div class="game-status">
                 <p id="gameStatus">Game in progress...</p>
             </div>
+            <button class="help-btn" id="settingsBtn">Settings</button>
             <button class="help-btn" id="helpBtn">How to Play</button>
         </div>
     </div>
@@ -1043,27 +1084,119 @@
             }
         }
 
-        // Place tokens on the grid
+        // Global variables to store settings
+        let startingChargedCores = 1;
+        let chargedCoreValue = 3;
+        let winningScore = 20;
+
+        // Show settings modal
+        function showSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            modal.classList.add('visible');
+            document.getElementById('startingChargedCores').value = startingChargedCores;
+            document.getElementById('chargedCoreValue').value = chargedCoreValue;
+            document.getElementById('winningScore').value = winningScore;
+
+            setTimeout(() => {
+                modal.querySelector('.modal-content').style.opacity = 1;
+                modal.querySelector('.modal-content').style.transform = 'translateY(0)';
+            }, 50);
+        }
+
+        // Hide settings modal
+        function hideSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            const content = modal.querySelector('.modal-content');
+            content.style.opacity = 0;
+            content.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                modal.classList.remove('visible');
+            }, 300);
+        }
+
+        // Apply settings and start a new game
+        function applySettingsAndNewGame() {
+            // Get values from input fields
+            startingChargedCores = parseInt(document.getElementById('startingChargedCores').value);
+            chargedCoreValue = parseInt(document.getElementById('chargedCoreValue').value);
+            winningScore = parseInt(document.getElementById('winningScore').value);
+
+            // Basic validation
+            if (isNaN(startingChargedCores) || isNaN(chargedCoreValue) || isNaN(winningScore)) {
+                alert("Please enter valid numbers for all settings.");
+                return;
+            }
+
+            // Hide the settings modal
+            hideSettingsModal();
+
+            // Start a new game with the applied settings
+            newGame();
+        }
+
+        // New Game function
+        function newGame() {
+            console.log("Starting a new game with settings:");
+            console.log("Starting Charged Cores:", startingChargedCores);
+            console.log("Charged Core Value:", chargedCoreValue);
+            console.log("Winning Score:", winningScore);
+
+            // Reset game state
+            gameState = {
+                currentPlayer: 0,
+                players: [
+                    { name: PLAYER_NAMES[0], score: 0, chargedTokens: startingChargedCores },
+                    { name: PLAYER_NAMES[1], score: 0, chargedTokens: startingChargedCores }
+                ],
+                grid: [],
+                selectedCells: [],
+                selectionMode: 'energy',
+                turnPhase: 'selecting',
+                placedEnergyToken: false,
+                gameOver: false
+            };
+
+            // Reinitialize the grid
+            initGrid();
+
+            // Update the player cards
+            updatePlayerCards();
+
+            // Reset game status
+            document.getElementById('gameStatus').textContent = `${gameState.players[gameState.currentPlayer].name}'s turn`;
+
+            // Switch selection mode back to energy
+            setSelectionMode('energy');
+
+            // Restart the game loop (if it was stopped)
+            if (gameState.gameOver) {
+                gameState.gameOver = false;
+                animations = []; // Clear any victory animations
+                cancelAnimationFrame(animationFrameId); // Stop any stray animation loops
+                gameLoop();
+            }
+        }
+
         function placeTokens() {
             try {
                 console.log(`Placing ${gameState.selectedCells.length} tokens on the grid`);
-                
+
                 // Keep track of all newly placed tokens
                 const placedPositions = [];
-                
+
                 gameState.selectedCells.forEach(selected => {
                     const { x, y, type } = selected;
-                    
-                    // Set token with initial value (energy=1, charged=2)
+
+                    // Use the configured chargedCoreValue
                     gameState.grid[y][x].token = `${type}-${gameState.currentPlayer}`;
-                    gameState.grid[y][x].value = type === 'energy' ? 1 : 2;
+                    gameState.grid[y][x].value = type === 'energy' ? 1 : chargedCoreValue;
                     gameState.grid[y][x].selected = false;
                     gameState.grid[y][x].justPlaced = true; // Mark as just placed for interaction detection
-                    
+
                     placedPositions.push({ x, y });
-                    
+
                     console.log(`Placed ${type} token at (${x}, ${y}) with value ${gameState.grid[y][x].value}`);
-                    
+
                     // Add placement animation
                     animations.push({
                         type: 'placement',
@@ -1074,8 +1207,9 @@
                         tokenType: type,
                         player: gameState.currentPlayer
                     });
-                });
-                
+
+                }); // Closing brace for forEach loop
+
                 // Clear selected cells
                 gameState.selectedCells = [];
             } catch (error) {
@@ -2723,6 +2857,37 @@
                         hideHelpModal();
                     };
                     console.log("Close modal button listener attached");
+                }
+
+                 // Hook up event listeners in the setupEventListeners function
+                // Settings button
+                const settingsBtn = document.getElementById('settingsBtn');
+                if (settingsBtn) {
+                    settingsBtn.onclick = function () {
+                        console.log("Settings button clicked");
+                        showSettingsModal();
+                    };
+                    console.log("Settings button listener attached");
+                }
+
+                // Close settings modal button
+                const closeSettingsModalBtn = document.getElementById('closeSettingsModal');
+                if (closeSettingsModalBtn) {
+                    closeSettingsModalBtn.onclick = function () {
+                        console.log("Close settings modal button clicked");
+                        hideSettingsModal();
+                    };
+                    console.log("Close settings modal button listener attached");
+                }
+
+                // Apply settings button
+                const applySettingsBtn = document.getElementById('applySettingsBtn');
+                if (applySettingsBtn) {
+                    applySettingsBtn.onclick = function () {
+                        console.log("Apply settings button clicked");
+                        applySettingsAndNewGame();
+                    };
+                    console.log("Apply settings button listener attached");
                 }
                 
                 // Window resize listener
