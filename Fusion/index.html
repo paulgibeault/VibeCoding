@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Energy Grid Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* Mid-century modern inspired design with energy theme */
         :root {
@@ -360,7 +361,13 @@
             padding: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
-            justify-content: space-between;
+            justify-content: space-between; /* Keep space between turn info and buttons */
+            align-items: center;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px; /* Space between buttons */
             align-items: center;
         }
 
@@ -369,22 +376,33 @@
             font-weight: 300;
         }
 
+        /* General button style */
         .help-btn {
             background-color: var(--tertiary-color);
             color: var(--background-color);
             border: none;
-            padding: 8px 20px;
+            padding: 8px 12px; /* Reduced padding for icon buttons */
             border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s ease;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            display: flex;          /* Enable flexbox for icon alignment */
+            align-items: center;   /* Vertically center the icon */
+            justify-content: center; /* Center icon horizontally */
+            font-size: 1rem;
         }
 
         .help-btn:hover {
             background-color: #e9b849;
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Style for icon inside the button */
+        .help-btn i {
+            margin-right: 0;  /* Remove text */
+            font-size: 1.2rem; /* Adjust icon size */
         }
 
         /* Modal styles */
@@ -546,8 +564,10 @@
             <div class="game-status">
                 <p id="gameStatus">Game in progress...</p>
             </div>
-            <button class="help-btn" id="settingsBtn">Settings</button>
-            <button class="help-btn" id="helpBtn">How to Play</button>
+            <div class="button-container">
+                <button class="help-btn" id="settingsBtn"><i class="fas fa-cog"></i></button>
+                <button class="help-btn" id="helpBtn"><i class="fas fa-question-circle"></i></button>
+            </div>
         </div>
     </div>
 
