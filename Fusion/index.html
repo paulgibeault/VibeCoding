@@ -635,7 +635,8 @@
             selectionMode: 'energy', // 'energy' or 'charged'
             turnPhase: 'selecting', // 'selecting' or 'animation'
             placedEnergyToken: false, // Flag to track if energy token has been placed
-            gameOver: false
+            gameOver: false,
+            anchorCell: null
         };
 
         // Canvas and rendering variables
@@ -903,6 +904,7 @@
             console.log(`[DEBUG - CLICK] Grid position clicked: (${x}, ${y})`);
             
             // Check if click is within grid
+            // In handleCanvasClick():
             if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
                 try {
                     const cell = gameState.grid[y][x];
@@ -910,22 +912,22 @@
                         console.error(`[DEBUG - CLICK] Cell at (${x}, ${y}) is undefined!`);
                         return;
                     }
-                    
+
                     console.log(`[DEBUG - CLICK] Cell state: occupied=${cell.token ? 'yes' : 'no'}, selected=${cell.selected}`);
-                    
+
                     // Toggle selection
                     if (cell.selected) {
                         console.log("[DEBUG - CLICK] Deselecting cell");
-                        
+
                         // Find the cell in selectedCells
                         const index = gameState.selectedCells.findIndex(
                             selected => selected.x === x && selected.y === y
                         );
-                        
+
                         if (index !== -1) {
                             const deselectedCell = gameState.selectedCells[index];
                             console.log(`[DEBUG - CLICK] Found cell to deselect at index ${index}, type: ${deselectedCell.type}`);
-                            
+
                             // Only modify charged count if deselecting a charged core
                             if (deselectedCell.type === 'charged') {
                                 const oldCount = gameState.players[gameState.currentPlayer].chargedTokens;
@@ -938,22 +940,22 @@
                                 gameState.placedEnergyToken = false;
                                 console.log("[DEBUG - CLICK] Energy token deselected, placedEnergyToken set to false");
                             }
-                            
+
                             // Remove from selectedCells
                             gameState.selectedCells.splice(index, 1);
                             console.log("[DEBUG - CLICK] Cell removed from selectedCells, new count:", gameState.selectedCells.length);
                         }
-                        
+
                         // Deselect the cell
                         cell.selected = false;
                     } else if (!cell.token) {
                         // Select only if cell is empty
                         console.log("[DEBUG - CLICK] Attempting to select empty cell");
-                        
+
                         // Check if exceeding max selections
                         const maxSelections = 1 + gameState.players[gameState.currentPlayer].chargedTokens;
                         console.log(`[DEBUG - CLICK] Max selections allowed: ${maxSelections}, current selections: ${gameState.selectedCells.length}`);
-                        
+
                         if (gameState.selectedCells.length + 1 > maxSelections) {
                             console.log(`[DEBUG - CLICK] Cannot select more than ${maxSelections} cells`);
                             updateGameStatus(`Cannot place more than ${maxSelections} cores in one turn!`, true);
@@ -962,11 +964,19 @@
                             }, 2000);
                             return;
                         }
-                        
+
                         // Determine token type based on selection count
                         const tokenType = gameState.selectedCells.length === 0 ? 'energy' : 'charged';
+
+                        // Set anchor cell if this is the first selection of the turn
+                        if (gameState.selectedCells.length === 0) {
+                            gameState.anchorCell = { x: x, y: y };
+                            console.log(`[DEBUG - CLICK] Set anchor cell to (${x}, ${y})`);
+                            // Optionally, add code to highlight the anchor cell visually (see below)
+                        }
+
                         console.log(`[DEBUG - CLICK] Token type for selection: ${tokenType}`);
-                        
+
                         // If trying to place a charged token when none are available
                         if (tokenType === 'charged' && gameState.players[gameState.currentPlayer].chargedTokens === 0) {
                             console.log("[DEBUG - CLICK] No charged cores available");
@@ -976,7 +986,7 @@
                             }, 2000);
                             return;
                         }
-                        
+
                         // Update energy token placement flag
                         if (tokenType === 'energy') {
                             gameState.placedEnergyToken = true;
@@ -990,21 +1000,21 @@
                             updatePlayerCards();
                             updateGameStatus("Charged core selected");
                         }
-                        
+
                         cell.selected = true;
                         gameState.selectedCells.push({ x, y, type: tokenType });
                         console.log(`[DEBUG - CLICK] Cell selected at (${x}, ${y}), type: ${tokenType}`);
-                        
+
                         // Add selection particles
                         addSelectionParticles(x, y);
                     } else {
                         console.log("[DEBUG - CLICK] Cell already occupied");
                         updateGameStatus("Cell already occupied");
                     }
-                    
+
                     // Force re-render
                     render();
-                    
+
                     console.log("[DEBUG - CLICK] Final state - Charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
                     console.log("[DEBUG - CLICK] Selected cells:", gameState.selectedCells);
                     console.log("[DEBUG - CLICK] ========== End Click Event ==========\n");
@@ -1016,6 +1026,7 @@
                 console.log("[DEBUG - CLICK] Click outside grid bounds");
                 updateGameStatus("Click outside grid bounds");
             }
+
         }
 
         // Add particles for selection feedback
@@ -1631,22 +1642,33 @@
                     console.log("No fusions to apply");
                     return;
                 }
-                
+
                 fusions.forEach(fusion => {
                     console.log(`Applying fusion: ${fusion.cells.length} cells with new value ${fusion.newValue}`);
-                    
-                    // Use the explicitly specified target cell for the fusion result
-                    // This should be the newly placed core that triggered the fusion
-                    const targetCell = fusion.targetCell;
+
+                    let targetCell = fusion.targetCell; // Default to newly placed core
+
+                    // Check if anchorCell is valid and on the board
+                    if (gameState.anchorCell &&
+                        gameState.anchorCell.x >= 0 && gameState.anchorCell.x < GRID_SIZE &&
+                        gameState.anchorCell.y >= 0 && gameState.anchorCell.y < GRID_SIZE &&
+                        gameState.grid[gameState.anchorCell.y][gameState.anchorCell.x]) {  // Make sure the cell exists!
+                        targetCell = { x: gameState.anchorCell.x, y: gameState.anchorCell.y };
+                        console.log(`Fusion target overridden by anchor cell at (${targetCell.x}, ${targetCell.y})`);
+                    } else {
+                        console.log("No valid anchor cell found, defaulting to target cell");
+                    }
+
+
                     console.log(`Using target cell for fusion at (${targetCell.x}, ${targetCell.y})`);
-                    
+
                     // Update the target cell's token type and value
                     gameState.grid[targetCell.y][targetCell.x].token = `${fusion.resultType || 'energy'}-${fusion.player}`;
                     gameState.grid[targetCell.y][targetCell.x].value = fusion.newValue;
                     gameState.grid[targetCell.y][targetCell.x].glow = 1;
-                    
+
                     console.log(`Fusion result at (${targetCell.x}, ${targetCell.y}): ${fusion.resultType || 'energy'} token with value ${fusion.newValue}`);
-                    
+
                     // Remove other cells involved in the fusion
                     for (const cell of fusion.cells) {
                         if (cell.x !== targetCell.x || cell.y !== targetCell.y) {
@@ -1656,7 +1678,7 @@
                         }
                     }
                 });
-                
+
                 // Update player cards
                 updatePlayerCards();
                 console.log("Fusions applied successfully");
@@ -1664,6 +1686,7 @@
                 console.error("Error applying fusions:", error);
             }
         }
+
 
         // Process eliminations
         function processEliminations(eliminations) {
@@ -1894,17 +1917,20 @@
             console.log("========== TURN END ==========\n");
             // Check for game end condition
             if (checkGameEnd()) return;
-            
+
             // Switch to next player
             gameState.currentPlayer = 1 - gameState.currentPlayer;
-            
+
             // Reset turn phase
             gameState.turnPhase = 'selecting';
-            
+
+            // Reset anchor cell
+            gameState.anchorCell = null;  // Add this line!
+
             // Update UI
             updatePlayerCards();
             document.getElementById('gameStatus').textContent = `${gameState.players[gameState.currentPlayer].name}'s turn`;
-            
+
             // Switch selection mode back to energy
             setSelectionMode('energy');
         }
@@ -2164,7 +2190,28 @@
                     const centerX = x * cellSize + cellSize / 2;
                     const centerY = y * cellSize + cellSize / 2;
                     const radius = cellSize * 0.4;
-                    
+
+                    // Draw anchor highlight - only if selected AND anchor
+                    if (gameState.anchorCell && gameState.anchorCell.x === x && gameState.anchorCell.y === y && cell.selected) {
+                        const pulseTime = Date.now() / 400; // Slightly slower pulse (400)
+                        const pulseFactor = Math.sin(pulseTime) * 0.4 + 0.6; //Adjusted range
+                        const glowRadius = cellSize * 0.8 * pulseFactor; // Increased glowRadius
+
+                        const grd = ctx.createRadialGradient(
+                            centerX, centerY, 0,
+                            centerX, centerY, glowRadius
+                        );
+                        grd.addColorStop(0, 'rgba(255, 255, 102, 0.7)'); // More opaque yellow
+                        grd.addColorStop(0.8, 'rgba(255, 255, 102, 0)');  // More concentrated
+                        grd.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+                        ctx.fillStyle = grd;
+                        ctx.beginPath();
+                        ctx.arc(centerX, centerY, glowRadius, 0, Math.PI * 2); // Draw a circle
+                        ctx.fill();
+                    }
+
+
                     // Draw selection
                     if (cell.selected) {
                         // Highlight background
@@ -2174,7 +2221,7 @@
                         );
                         grd.addColorStop(0, PLAYER_GLOW[gameState.currentPlayer]);
                         grd.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                        
+
                         ctx.fillStyle = grd;
                         ctx.fillRect(
                             x * cellSize,
@@ -2182,31 +2229,32 @@
                             cellSize,
                             cellSize
                         );
-                        
+
+                        // REMOVE THIS SECTION
                         // Draw border
-                        ctx.strokeStyle = PLAYER_COLORS[gameState.currentPlayer];
-                        ctx.lineWidth = 2;
-                        ctx.strokeRect(
-                            x * cellSize + 2,
-                            y * cellSize + 2,
-                            cellSize - 4,
-                            cellSize - 4
-                        );
-                        
+                        // ctx.strokeStyle = PLAYER_COLORS[gameState.currentPlayer];
+                        // ctx.lineWidth = 2;
+                        // ctx.strokeRect(
+                        //     x * cellSize + 2,
+                        //     y * cellSize + 2,
+                        //     cellSize - 4,
+                        //     cellSize - 4
+                        // );
+
                         // Draw token preview
                         ctx.globalAlpha = 0.7;
                         drawEnergyToken(centerX, centerY, radius, gameState.currentPlayer);
                         ctx.globalAlpha = 1.0;
                     }
-                    
+
                     // Draw token
                     if (cell.token) {
                         const tokenParts = cell.token.split('-');
                         const tokenType = tokenParts[0];
                         const player = parseInt(tokenParts[1]);
-                        
+
                         drawEnergyToken(centerX, centerY, radius, player, cell.glow);
-                        
+
                         // Draw token value (if defined)
                         if (cell.value && cell.value > 1) {
                             // Add a background for better visibility
@@ -2214,7 +2262,7 @@
                             ctx.beginPath();
                             ctx.arc(centerX + radius * 0.6, centerY - radius * 0.6, radius * 0.3, 0, Math.PI * 2);
                             ctx.fill();
-                            
+
                             // Draw the value
                             ctx.font = `bold ${Math.floor(radius * 0.5)}px Arial`;
                             ctx.fillStyle = 'white';
