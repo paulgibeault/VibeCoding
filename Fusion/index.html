@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Energy Grid Game</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+        integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* Mid-century modern inspired design with energy theme */
         :root {
@@ -63,13 +66,11 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: repeating-linear-gradient(
-                45deg,
-                rgba(255, 255, 255, 0.05),
-                rgba(255, 255, 255, 0.05) 10px,
-                rgba(255, 255, 255, 0) 10px,
-                rgba(255, 255, 255, 0) 20px
-            );
+            background: repeating-linear-gradient(45deg,
+                    rgba(255, 255, 255, 0.05),
+                    rgba(255, 255, 255, 0.05) 10px,
+                    rgba(255, 255, 255, 0) 10px,
+                    rgba(255, 255, 255, 0) 20px);
         }
 
         .game-header h1 {
@@ -120,7 +121,7 @@
             border-radius: 50%;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
         }
-        
+
         .player-card {
             background: rgba(42, 61, 69, 0.7);
             backdrop-filter: blur(10px);
@@ -156,16 +157,21 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(45deg, 
-                rgba(255,255,255,0) 0%, 
-                rgba(255,255,255,0.1) 50%, 
-                rgba(255,255,255,0) 100%);
+            background: linear-gradient(45deg,
+                    rgba(255, 255, 255, 0) 0%,
+                    rgba(255, 255, 255, 0.1) 50%,
+                    rgba(255, 255, 255, 0) 100%);
             animation: shine 2s infinite;
         }
 
         @keyframes shine {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
         }
 
         .turn-indicator {
@@ -194,9 +200,20 @@
         }
 
         @keyframes pulse {
-            0% { transform: scale(0.8); box-shadow: 0 0 15px 2px var(--player1-glow); }
-            50% { transform: scale(1.2); box-shadow: 0 0 25px 5px var(--player1-glow); }
-            100% { transform: scale(0.8); box-shadow: 0 0 15px 2px var(--player1-glow); }
+            0% {
+                transform: scale(0.8);
+                box-shadow: 0 0 15px 2px var(--player1-glow);
+            }
+
+            50% {
+                transform: scale(1.2);
+                box-shadow: 0 0 25px 5px var(--player1-glow);
+            }
+
+            100% {
+                transform: scale(0.8);
+                box-shadow: 0 0 15px 2px var(--player1-glow);
+            }
         }
 
         .player-name {
@@ -248,7 +265,7 @@
         .player2.stat-value {
             color: var(--secondary-color);
             text-shadow: 0 0 8px rgba(62, 205, 193, 0.5);
-            }
+        }
 
         .stat-label {
             font-size: 0.9rem;
@@ -275,8 +292,8 @@
             border-radius: 15px;
             overflow: hidden;
             background-color: var(--grid-color);
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.4), 
-                        inset 0 0 20px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.4),
+                inset 0 0 20px rgba(0, 0, 0, 0.6);
             position: relative;
         }
 
@@ -322,20 +339,27 @@
             height: 100%;
             top: 0;
             left: -100px;
-            background: linear-gradient(
-                90deg,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 255, 255, 0.4) 50%,
-                rgba(255, 255, 255, 0) 100%
-            );
+            background: linear-gradient(90deg,
+                    rgba(255, 255, 255, 0) 0%,
+                    rgba(255, 255, 255, 0.4) 50%,
+                    rgba(255, 255, 255, 0) 100%);
             animation: btnShine 3s infinite;
         }
 
         @keyframes btnShine {
-            0% { left: -100px; }
-            20% { left: 100%; }
-            100% { left: 100%; }
+            0% {
+                left: -100px;
+            }
+
+            20% {
+                left: 100%;
+            }
+
+            100% {
+                left: 100%;
+            }
         }
+
         .setting-row {
             display: flex;
             justify-content: space-between;
@@ -354,24 +378,27 @@
             border: 1px solid #ccc;
             text-align: center;
         }
-        
+
         /* Game info */
         .game-info {
             background: rgba(0, 0, 0, 0.2);
             padding: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
-            justify-content: space-between; /* Keep space between turn info and buttons */
+            justify-content: space-between;
+            /* Keep space between turn info and buttons */
             align-items: center;
         }
 
         .button-container {
             display: flex;
-            gap: 10px; /* Space between buttons */
+            gap: 10px;
+            /* Space between buttons */
             align-items: center;
         }
 
-        .turn-info, .game-status {
+        .turn-info,
+        .game-status {
             font-size: 1.1rem;
             font-weight: 300;
         }
@@ -381,15 +408,19 @@
             background-color: var(--tertiary-color);
             color: var(--background-color);
             border: none;
-            padding: 8px 12px; /* Reduced padding for icon buttons */
+            padding: 8px 12px;
+            /* Reduced padding for icon buttons */
             border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s ease;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            display: flex;          /* Enable flexbox for icon alignment */
-            align-items: center;   /* Vertically center the icon */
-            justify-content: center; /* Center icon horizontally */
+            display: flex;
+            /* Enable flexbox for icon alignment */
+            align-items: center;
+            /* Vertically center the icon */
+            justify-content: center;
+            /* Center icon horizontally */
             font-size: 1rem;
         }
 
@@ -401,8 +432,10 @@
 
         /* Style for icon inside the button */
         .help-btn i {
-            margin-right: 0;  /* Remove text */
-            font-size: 1.2rem; /* Adjust icon size */
+            margin-right: 0;
+            /* Remove text */
+            font-size: 1.2rem;
+            /* Adjust icon size */
         }
 
         /* Modal styles */
@@ -444,7 +477,8 @@
             color: var(--text-color);
         }
 
-        .modal.visible, .modal-content {
+        .modal.visible,
+        .modal-content {
             transform: translateY(0);
             opacity: 1;
         }
@@ -476,12 +510,14 @@
             color: var(--secondary-color);
         }
 
-        .modal-body p, .modal-body li {
+        .modal-body p,
+        .modal-body li {
             margin-bottom: 10px;
             line-height: 1.6;
         }
 
-        .modal-body ul, .modal-body ol {
+        .modal-body ul,
+        .modal-body ol {
             margin-left: 20px;
             margin-bottom: 15px;
         }
@@ -495,23 +531,24 @@
             .game-board-container {
                 flex-direction: column;
             }
-            
+
             .player-card {
                 width: 100%;
                 margin-bottom: 5px;
             }
-            
+
             .game-controls {
                 flex-direction: column;
                 gap: 15px;
             }
-            
+
             .end-turn-btn {
                 width: 100%;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="modal" id="settingsModal">
         <div class="modal-content">
@@ -526,7 +563,7 @@
                     <label for="chargedCoreValue">Charged Core Value:</label>
                     <input type="number" id="chargedCoreValue" min="1" value="3">
                 </div>
-                 <div class="setting-row">
+                <div class="setting-row">
                     <label for="winningScore">Winning Score:</label>
                     <input type="number" id="winningScore" min="10" value="20">
                 </div>
@@ -534,29 +571,29 @@
             </div>
         </div>
     </div>
-    
+
     <div class="game-container">
         <div class="game-header">
             <h1>ENERGY GRID</h1>
             <p>A strategic battle of energy cores and fusion reactions</p>
         </div>
-        
+
         <div class="game-content">
             <div class="game-board-container">
                 <div class="player-cards">
                     <!-- Player cards will be dynamically generated here -->
                 </div>
-                
+
                 <div class="game-board">
                     <canvas id="gameCanvas"></canvas>
                 </div>
             </div>
-            
+
             <div class="game-controls">
                 <button id="endTurnBtn" class="end-turn-btn">End Turn</button>
             </div>
         </div>
-        
+
         <div class="game-info">
             <div class="turn-info">
                 <p>Current Turn: <span id="currentPlayer">Player 1</span></p>
@@ -578,44 +615,49 @@
             <div class="modal-body">
                 <h3>Game Objective</h3>
                 <p>Score the most points by creating fusions and eliminating opponent cores.</p>
-                
+
                 <h3>Turn Structure</h3>
                 <ol>
                     <li>Your first placed core each turn is automatically an Energy Core</li>
                     <li>Any additional cores placed are Charged Cores (using your available supply)</li>
                     <li>Click "End Turn" to confirm placement</li>
                 </ol>
-                
+
                 <h3>Placing Cores</h3>
-                <p>Click on empty grid cells to select them for placement. Click again to deselect. Cores are placed at the end of your turn.</p>
-                
+                <p>Click on empty grid cells to select them for placement. Click again to deselect. Cores are placed at
+                    the end of your turn.</p>
+
                 <h3>Core Interactions</h3>
-                <p><strong>Fusion (Same Cores):</strong> When you place a core orthogonally adjacent (not diagonally) to your own cores, they fuse into a single core at the placement location. The value of the new core is the sum of the fused cores.</p>
-                <p><strong>Elimination (Different Cores):</strong> When you place a core orthogonally adjacent to opponent cores of equal or lesser value, the opponent's cores are eliminated and returned to their owner as charged cores.</p>
-                
+                <p><strong>Fusion (Same Cores):</strong> When you place a core orthogonally adjacent (not diagonally) to
+                    your own cores, they fuse into a single core at the placement location. The value of the new core is
+                    the sum of the fused cores.</p>
+                <p><strong>Elimination (Different Cores):</strong> When you place a core orthogonally adjacent to
+                    opponent cores of equal or lesser value, the opponent's cores are eliminated and returned to their
+                    owner as charged cores.</p>
+
                 <h3>Scoring</h3>
                 <ul>
                     <li>Score increases by the sum of eliminated cores' values.</li>
                 </ul>
-                
+
                 <h3>Charged Cores</h3>
                 <ul>
                     <li>Players start with 0 charged cores.</li>
                     <li>Placing a charged core decreases your charged core count by 1.</li>
                     <li>When your cores are eliminated, they are returned to you as charged cores.</li>
                 </ul>
-                
+
                 <h3>Game End</h3>
                 <p>The game ends when a player reaches 20 points.</p>
             </div>
         </div>
     </div>
-    
+
     <script>
         "use strict"; // Enable strict mode for better error detection
-        
+
         console.log("Script loading");
-    
+
         // Game constants
         const GRID_SIZE = 8;
         const PLAYER_COLORS = ['#FF5A5F', '#3ECDC1']; // Player 1, Player 2
@@ -645,13 +687,13 @@
         let animationFrameId;
         let animations = [];
         let particles = []; // For particle effects
-        
+
         // Critical flag to prevent rendering before initialization is complete
         let gameReadyToRender = false;
-        
+
         // Debug mode
         const DEBUG = true;
-        
+
         function debug(message) {
             if (DEBUG) {
                 console.log(message);
@@ -666,16 +708,16 @@
                 }
             }
         }
-        
+
         // Global helper to directly update game status for critical messages
         function updateGameStatus(message, isError = false) {
             console.log(message);
-            
+
             try {
                 const statusElement = document.getElementById('gameStatus');
                 if (statusElement) {
                     statusElement.textContent = message;
-                    
+
                     if (isError) {
                         statusElement.style.color = 'red';
                         setTimeout(() => {
@@ -687,7 +729,7 @@
                 console.error("Failed to update status:", e);
             }
         }
-        
+
         // This function is now unused as we're initializing directly in init()
         function initGame() {
             console.log("initGame function called - but using direct initialization instead");
@@ -722,9 +764,9 @@
                 canvas.width = size;
                 canvas.height = size;
                 cellSize = size / GRID_SIZE;
-                
+
                 debug(`Canvas resized to ${size}x${size}, cell size: ${cellSize}`);
-                
+
                 // Re-render after resize
                 render();
             } catch (error) {
@@ -736,25 +778,25 @@
         // Create player cards in the DOM
         function createPlayerCards() {
             console.log("Creating player cards");
-            
+
             const playerCardsContainer = document.querySelector('.player-cards');
-            
+
             if (!playerCardsContainer) {
                 console.error("Player cards container not found!");
                 return;
             }
-            
+
             playerCardsContainer.innerHTML = '';
-            
+
             console.log("Player cards container found, creating cards");
-            
+
             gameState.players.forEach((player, index) => {
                 const playerCard = document.createElement('div');
                 playerCard.className = `player-card player${index + 1}`;
                 if (index === gameState.currentPlayer) {
                     playerCard.classList.add('active');
                 }
-                
+
                 playerCard.innerHTML = `
                     <div class="turn-indicator"></div>
                     <h2 class="player-name">${player.name}</h2>
@@ -772,7 +814,7 @@
                 playerCardsContainer.appendChild(playerCard);
                 console.log(`Player ${index + 1} card created`);
             });
-            
+
             console.log("All player cards created successfully");
         }
 
@@ -846,17 +888,17 @@
             // Combine the adjusted components into a new hex color
             return `#${newHexR}${newHexG}${newHexB}`;
         }
-        
+
         // Set the current selection mode
         function setSelectionMode(mode) {
             console.log(`Selection mode change requested: ${mode}`);
-            
+
             // Don't allow changing if game is over
             if (gameState.gameOver) {
                 console.log("Game is over, ignoring selection mode change");
                 return;
             }
-            
+
             // Don't switch to charged if player has no charged tokens
             if (mode === 'charged' && gameState.players[gameState.currentPlayer].chargedTokens <= 0) {
                 console.log("Player has no charged tokens available");
@@ -866,7 +908,7 @@
                 }, 2000);
                 return;
             }
-            
+
             gameState.selectionMode = mode;
             console.log(`Selection mode changed to: ${mode}`);
             updateGameStatus(`Selected ${mode} core placement mode`);
@@ -879,166 +921,209 @@
             console.log("[DEBUG - CLICK] Current player:", gameState.currentPlayer + 1);
             console.log("[DEBUG - CLICK] Selected cells count:", gameState.selectedCells.length);
             console.log("[DEBUG - CLICK] Energy token placed:", gameState.placedEnergyToken);
-            
-            // Safety checks
+
+            // 1. Preliminary Checks
+            if (!preliminaryChecks()) return;
+
+            // 2. Get Click Coordinates
+            const { x, y } = getGridCoordinates(event);
+            if (x === null) return; // Click was outside grid
+
+            // 3. Handle Cell Selection
+            handleCellSelection(x, y);
+        }
+
+        // 1. Preliminary Checks (Game Ready, Turn Phase)
+        function preliminaryChecks() {
             if (!gameReadyToRender) {
                 console.log("[DEBUG - CLICK] Game not ready for interaction");
                 updateGameStatus("Game still initializing...");
-                return;
+                return false;
             }
-            
+
             if (gameState.turnPhase !== 'selecting' || gameState.gameOver) {
                 console.log("[DEBUG - CLICK] Turn phase or game state prevents selection");
                 updateGameStatus(gameState.gameOver ? "Game is over!" : "Cannot select during animations");
-                return;
+                return false;
             }
-            
-            // Get grid coordinates from click position
+            return true;
+        }
+
+        // 2. Get Grid Coordinates from Click Event
+        function getGridCoordinates(event) {
             const rect = canvas.getBoundingClientRect();
             const clickX = event.clientX - rect.left;
             const clickY = event.clientY - rect.top;
-            
+
             const x = Math.floor(clickX / cellSize);
             const y = Math.floor(clickY / cellSize);
-            
+
             console.log(`[DEBUG - CLICK] Grid position clicked: (${x}, ${y})`);
-            
-            // Check if click is within grid
-            // In handleCanvasClick():
-            if (x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE) {
-                try {
-                    const cell = gameState.grid[y][x];
-                    if (!cell) {
-                        console.error(`[DEBUG - CLICK] Cell at (${x}, ${y}) is undefined!`);
-                        return;
-                    }
 
-                    console.log(`[DEBUG - CLICK] Cell state: occupied=${cell.token ? 'yes' : 'no'}, selected=${cell.selected}`);
-
-                    // Toggle selection
-                    if (cell.selected) {
-                        console.log("[DEBUG - CLICK] Deselecting cell");
-
-                        // Find the cell in selectedCells
-                        const index = gameState.selectedCells.findIndex(
-                            selected => selected.x === x && selected.y === y
-                        );
-
-                        if (index !== -1) {
-                            const deselectedCell = gameState.selectedCells[index];
-                            console.log(`[DEBUG - CLICK] Found cell to deselect at index ${index}, type: ${deselectedCell.type}`);
-
-                            // Only modify charged count if deselecting a charged core
-                            if (deselectedCell.type === 'charged') {
-                                const oldCount = gameState.players[gameState.currentPlayer].chargedTokens;
-                                // Return the charged core to the player's count
-                                gameState.players[gameState.currentPlayer].chargedTokens++;
-                                console.log(`[DEBUG - CLICK] Returned charged core to player ${gameState.currentPlayer + 1}, count: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedTokens}`);
-                                updatePlayerCards();
-                            } else if (deselectedCell.type === 'energy') {
-                                // If deselecting energy core, update the flag
-                                gameState.placedEnergyToken = false;
-                                console.log("[DEBUG - CLICK] Energy token deselected, placedEnergyToken set to false");
-                            }
-
-                            // Remove from selectedCells
-                            gameState.selectedCells.splice(index, 1);
-                            console.log("[DEBUG - CLICK] Cell removed from selectedCells, new count:", gameState.selectedCells.length);
-                        }
-
-                        // Deselect the cell
-                        cell.selected = false;
-                    } else if (!cell.token) {
-                        // Select only if cell is empty
-                        console.log("[DEBUG - CLICK] Attempting to select empty cell");
-
-                        // Check if exceeding max selections
-                        const maxSelections = 1 + gameState.players[gameState.currentPlayer].chargedTokens;
-                        console.log(`[DEBUG - CLICK] Max selections allowed: ${maxSelections}, current selections: ${gameState.selectedCells.length}`);
-
-                        if (gameState.selectedCells.length + 1 > maxSelections) {
-                            console.log(`[DEBUG - CLICK] Cannot select more than ${maxSelections} cells`);
-                            updateGameStatus(`Cannot place more than ${maxSelections} cores in one turn!`, true);
-                            setTimeout(() => {
-                                updateGameStatus("Game in progress...");
-                            }, 2000);
-                            return;
-                        }
-
-                        // Determine token type based on selection count
-                        const tokenType = gameState.selectedCells.length === 0 ? 'energy' : 'charged';
-
-                        // Set anchor cell if this is the first selection of the turn
-                        if (gameState.selectedCells.length === 0) {
-                            gameState.anchorCell = { x: x, y: y };
-                            console.log(`[DEBUG - CLICK] Set anchor cell to (${x}, ${y})`);
-                            // Optionally, add code to highlight the anchor cell visually (see below)
-                        }
-
-                        console.log(`[DEBUG - CLICK] Token type for selection: ${tokenType}`);
-
-                        // If trying to place a charged token when none are available
-                        if (tokenType === 'charged' && gameState.players[gameState.currentPlayer].chargedTokens === 0) {
-                            console.log("[DEBUG - CLICK] No charged cores available");
-                            updateGameStatus("No charged cores available!", true);
-                            setTimeout(() => {
-                                updateGameStatus("Game in progress...");
-                            }, 2000);
-                            return;
-                        }
-
-                        // Update energy token placement flag
-                        if (tokenType === 'energy') {
-                            gameState.placedEnergyToken = true;
-                            console.log("[DEBUG - CLICK] Energy token selected, placedEnergyToken set to true");
-                            updateGameStatus("Energy core selected");
-                        } else {
-                            const oldCount = gameState.players[gameState.currentPlayer].chargedTokens;
-                            // Decrement charged core count when selecting a charged core
-                            gameState.players[gameState.currentPlayer].chargedTokens--;
-                            console.log(`[DEBUG - CLICK] Used charged core, player ${gameState.currentPlayer + 1} count: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedTokens}`);
-                            updatePlayerCards();
-                            updateGameStatus("Charged core selected");
-                        }
-
-                        cell.selected = true;
-                        gameState.selectedCells.push({ x, y, type: tokenType });
-                        console.log(`[DEBUG - CLICK] Cell selected at (${x}, ${y}), type: ${tokenType}`);
-
-                        // Add selection particles
-                        addSelectionParticles(x, y);
-                    } else {
-                        console.log("[DEBUG - CLICK] Cell already occupied");
-                        updateGameStatus("Cell already occupied");
-                    }
-
-                    // Force re-render
-                    render();
-
-                    console.log("[DEBUG - CLICK] Final state - Charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
-                    console.log("[DEBUG - CLICK] Selected cells:", gameState.selectedCells);
-                    console.log("[DEBUG - CLICK] ========== End Click Event ==========\n");
-                } catch (error) {
-                    console.error("[DEBUG - CLICK] Error handling grid click:", error);
-                    updateGameStatus("Error processing selection", true);
-                }
-            } else {
+            if (x < 0 || x >= GRID_SIZE || y < 0 || y >= GRID_SIZE) {
                 console.log("[DEBUG - CLICK] Click outside grid bounds");
                 updateGameStatus("Click outside grid bounds");
+                return { x: null, y: null };
             }
 
+            return { x, y };
+        }
+
+        // 3. Handle Cell Selection/Deselection Logic
+        function handleCellSelection(x, y) {
+            try {
+                const cell = gameState.grid[y][x];
+                if (!cell) {
+                    console.error(`[DEBUG - CLICK] Cell at (${x}, ${y}) is undefined!`);
+                    return;
+                }
+
+                console.log(`[DEBUG - CLICK] Cell state: occupied=${cell.token ? 'yes' : 'no'}, selected=${cell.selected}`);
+
+                if (cell.selected) {
+                    deselectCell(x, y, cell);
+                } else {
+                    selectCell(x, y, cell);
+                }
+
+                // Force re-render
+                render();
+
+                console.log("[DEBUG - CLICK] Final state - Charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
+                console.log("[DEBUG - CLICK] Selected cells:", gameState.selectedCells);
+                console.log("[DEBUG - CLICK] ========== End Click Event ==========\n");
+
+            } catch (error) {
+                console.error("[DEBUG - CLICK] Error handling grid click:", error);
+                updateGameStatus("Error processing selection", true);
+            }
+        }
+
+        // 3a. Deselect Cell
+        function deselectCell(x, y, cell) {
+            console.log("[DEBUG - CLICK] Deselecting cell");
+
+            // Find the cell in selectedCells
+            const index = gameState.selectedCells.findIndex(
+                selected => selected.x === x && selected.y === y
+            );
+
+            if (index !== -1) {
+                const deselectedCell = gameState.selectedCells[index];
+                console.log(`[DEBUG - CLICK] Found cell to deselect at index ${index}, type: ${deselectedCell.type}`);
+
+                // Only modify charged count if deselecting a charged core
+                if (deselectedCell.type === 'charged') {
+                    const oldCount = gameState.players[gameState.currentPlayer].chargedTokens;
+                    // Return the charged core to the player's count
+                    gameState.players[gameState.currentPlayer].chargedTokens++;
+                    console.log(`[DEBUG - CLICK] Returned charged core to player ${gameState.currentPlayer + 1}, count: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedTokens}`);
+                    updatePlayerCards();
+                } else if (deselectedCell.type === 'energy') {
+                    // If deselecting energy core, update the flag
+                    gameState.placedEnergyToken = false;
+                    console.log("[DEBUG - CLICK] Energy token deselected, placedEnergyToken set to false");
+                }
+
+                // Remove from selectedCells
+                gameState.selectedCells.splice(index, 1);
+                console.log("[DEBUG - CLICK] Cell removed from selectedCells, new count:", gameState.selectedCells.length);
+            }
+
+            // Deselect the cell
+            cell.selected = false;
+        }
+
+        // 3b. Select Cell
+        function selectCell(x, y, cell) {
+            console.log("[DEBUG - CLICK] Attempting to select empty cell");
+
+            // Check if energy token has been placed
+            if (!gameState.placedEnergyToken && gameState.selectedCells.length > 0) {
+                console.log("[DEBUG - CLICK] Energy token must be placed first");
+                updateGameStatus("Energy token must be placed first", true);
+                setTimeout(() => {
+                    updateGameStatus("Game in progress...");
+                }, 2000);
+                return;
+            }
+
+            // Determine token type based on selection count
+            const tokenType = gameState.selectedCells.length === 0 ? 'energy' : 'charged';
+
+            // Check if attempting to place energy token when already placed
+            if (tokenType === 'energy' && gameState.placedEnergyToken) {
+                console.log("[DEBUG - CLICK] Energy token already placed");
+                updateGameStatus("Energy core already placed", true);
+                setTimeout(() => {
+                    updateGameStatus("Game in progress...");
+                }, 2000);
+                return;
+            }
+
+            // If trying to place a charged token when none are available
+            if (tokenType === 'charged' && gameState.players[gameState.currentPlayer].chargedTokens === 0) {
+                console.log("[DEBUG - CLICK] No charged cores available");
+                updateGameStatus("No charged cores available!", true);
+                setTimeout(() => {
+                    updateGameStatus("Game in progress...");
+                }, 2000);
+                return;
+            }
+
+            // Calculate Max Selections using tokenType as a condition
+            let availableCores = gameState.players[gameState.currentPlayer].chargedTokens;
+
+            console.log(`[DEBUG - CLICK] Max selections allowed: ${availableCores}, current selections: ${gameState.selectedCells.filter(cell => cell.type === 'charged').length}`);
+
+            if (tokenType === 'charged' && availableCores <= 0) {
+                console.log(`[DEBUG - CLICK] Cannot select more than ${availableCores} cells`);
+                updateGameStatus(`Cannot place more than ${availableCores} cores in one turn!`, true);
+                setTimeout(() => {
+                    updateGameStatus("Game in progress...");
+                }, 2000);
+                return;
+            }
+
+            // Set anchor cell if this is the first selection of the turn
+            if (gameState.selectedCells.length === 0) {
+                gameState.anchorCell = { x: x, y: y };
+                console.log(`[DEBUG - CLICK] Set anchor cell to (${x}, ${y})`);
+                // Optionally, add code to highlight the anchor cell visually (see below)
+            }
+
+            // Update energy token placement flag
+            if (tokenType === 'energy') {
+                gameState.placedEnergyToken = true;
+                console.log("[DEBUG - CLICK] Energy token selected, placedEnergyToken set to true");
+                updateGameStatus("Energy core selected");
+            } else {
+                const oldCount = gameState.players[gameState.currentPlayer].chargedTokens;
+                // Decrement charged core count when selecting a charged core
+                gameState.players[gameState.currentPlayer].chargedTokens--;
+                console.log(`[DEBUG - CLICK] Used charged core, player ${gameState.currentPlayer + 1} count: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedTokens}`);
+                updatePlayerCards();
+                updateGameStatus("Charged core selected");
+            }
+
+            cell.selected = true;
+            gameState.selectedCells.push({ x, y, type: tokenType });
+            console.log(`[DEBUG - CLICK] Cell selected at (${x}, ${y}), type: ${tokenType}`);
+
+            // Add selection particles
+            addSelectionParticles(x, y);
         }
 
         // Add particles for selection feedback
         function addSelectionParticles(x, y) {
             const centerX = x * cellSize + cellSize / 2;
             const centerY = y * cellSize + cellSize / 2;
-            
+
             for (let i = 0; i < 12; i++) {
                 const angle = (i / 12) * Math.PI * 2;
                 const speed = 1 + Math.random() * 2;
                 const lifespan = 30 + Math.random() * 20;
-                
+
                 particles.push({
                     x: centerX,
                     y: centerY,
@@ -1061,19 +1146,19 @@
             logBoardState("Initial ");
             console.log("[DEBUG] End turn requested");
             console.log("[DEBUG] Current charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
-            
+
             if (!gameReadyToRender) {
                 console.log("[DEBUG] Game not ready for turn end");
                 updateGameStatus("Game still initializing...");
                 return;
             }
-            
+
             if (gameState.turnPhase !== 'selecting' || gameState.gameOver) {
                 console.log("[DEBUG] Cannot end turn: phase =", gameState.turnPhase, "gameOver =", gameState.gameOver);
                 updateGameStatus(gameState.gameOver ? "Game is over!" : "Cannot end turn during animations");
                 return;
             }
-            
+
             // Verify placed an energy token
             if (!gameState.placedEnergyToken) {
                 console.log("[DEBUG] No energy token placed");
@@ -1083,26 +1168,26 @@
                 }, 2000);
                 return;
             }
-            
+
             // Verify player has enough charged tokens
             const chargedCount = gameState.selectedCells.filter(cell => cell.type === 'charged').length;
             console.log("[DEBUG] Attempting to place", chargedCount, "charged cores");
             console.log("[DEBUG] Player", gameState.currentPlayer + 1, "has", gameState.players[gameState.currentPlayer].chargedTokens, "charged cores available");
-            
+
             try {
                 // Change phase to animation
                 gameState.turnPhase = 'animation';
                 console.log("[DEBUG] Turn phase changed to animation");
                 updateGameStatus("Processing turn...");
-                
+
                 // Place tokens on the grid
                 placeTokens();
                 console.log("[DEBUG] Tokens placed on grid");
                 console.log("[DEBUG] Current charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
-                
+
                 // Reset energy token flag for next turn
                 gameState.placedEnergyToken = false;
-                
+
                 // Check for fusions and eliminations
                 console.log("[DEBUG] Scheduling core interactions processing");
                 setTimeout(() => {
@@ -1114,7 +1199,6 @@
                 updateGameStatus("Error processing turn", true);
             }
         }
-
         // Global variables to store settings
         let startingChargedCores = 1;
         let chargedCoreValue = 3;
@@ -1252,7 +1336,7 @@
         function processCoreInteractions() {
             try {
                 console.log("\n----- Processing Core Interactions -----");
-                
+
                 // Find all cells marked as just placed
                 const newCores = [];
                 for (let y = 0; y < GRID_SIZE; y++) {
@@ -1265,45 +1349,45 @@
                         }
                     }
                 }
-                
+
                 console.log(`Found ${newCores.length} newly placed cores to check for interactions`);
-                
+
                 // First handle eliminations - any opponent core adjacent to newly placed cores
                 const eliminations = [];
                 const eliminatedPositions = new Set(); // Track positions to avoid duplicates
-                
+
                 newCores.forEach(core => {
                     // Get the value of this newly placed core
                     const placedCoreValue = core.value;
                     console.log(`Checking for eliminations from core at (${core.x}, ${core.y}) with value ${placedCoreValue}`);
-                    
+
                     // Get adjacent cells
                     const adjacentCells = getAdjacentCells(core.x, core.y);
-                    
+
                     // Check for opponent cores to eliminate (only equal or lesser value)
                     adjacentCells.forEach(adjInfo => {
                         const adjCell = adjInfo.cell;
                         if (!adjCell.token) return;
-                        
+
                         const adjTokenParts = adjCell.token.split('-');
                         const adjPlayer = parseInt(adjTokenParts[1]);
                         const adjTokenType = adjTokenParts[0];
-                        
+
                         // Calculate the value of the adjacent enemy core
                         const adjCoreValue = adjCell.value || (adjTokenType === 'energy' ? 1 : 2);
-                        
+
                         console.log(`Checking elimination: Core at (${core.x}, ${core.y}) value ${placedCoreValue} vs adjacent at (${adjInfo.x}, ${adjInfo.y}) value ${adjCoreValue}`);
-                        
+
                         // If adjacent core belongs to opponent AND has lower value
                         if (adjPlayer !== gameState.currentPlayer && placedCoreValue > adjCoreValue) {
                             const posKey = `${adjInfo.x},${adjInfo.y}`;
-                            
+
                             // Skip if already processed
                             if (eliminatedPositions.has(posKey)) return;
                             eliminatedPositions.add(posKey);
-                            
+
                             console.log(`Found eligible elimination at (${adjInfo.x}, ${adjInfo.y}): value ${adjCoreValue} < ${placedCoreValue}`);
-                            
+
                             // Add to eliminations
                             eliminations.push({
                                 x: adjInfo.x,
@@ -1319,55 +1403,55 @@
                         }
                     });
                 });
-                
+
                 // Then handle fusions - for each newly placed core, find connected friendly cores
                 const fusions = [];
                 const processedForFusion = new Set(); // Track positions we've already processed
-                
+
                 newCores.forEach(newCore => {
                     const posKey = `${newCore.x},${newCore.y}`;
-                    
+
                     // Skip if this core has already been included in a fusion
                     if (processedForFusion.has(posKey)) return;
-                    
+
                     const cell = gameState.grid[newCore.y][newCore.x];
                     if (!cell.token) return; // Safety check
-                    
+
                     const tokenParts = cell.token.split('-');
                     const player = parseInt(tokenParts[1]);
-                    
+
                     // Check adjacent cells for same player cores
                     const adjacentCells = getAdjacentCells(newCore.x, newCore.y);
                     const sameCores = adjacentCells.filter(adjInfo => {
                         if (!adjInfo.cell.token) return false;
-                        
+
                         const adjTokenParts = adjInfo.cell.token.split('-');
                         return parseInt(adjTokenParts[1]) === player;
                     });
-                    
+
                     // If we found adjacent cores of the same player, create a fusion
                     if (sameCores.length > 0) {
                         // Start BFS from this newly placed core to find all connected cores
                         const fusionCells = [];
                         const queue = [newCore]; // Start with newly placed core
                         const visited = new Set([posKey]);
-                        
+
                         while (queue.length > 0) {
                             const current = queue.shift();
                             fusionCells.push(current);
                             processedForFusion.add(`${current.x},${current.y}`);
-                            
+
                             // Check all adjacent cells
                             const adj = getAdjacentCells(current.x, current.y);
                             adj.forEach(adjInfo => {
                                 const adjCell = adjInfo.cell;
                                 const adjKey = `${adjInfo.x},${adjInfo.y}`;
-                                
+
                                 // If adjacent cell has a token of the same player and not visited
                                 if (adjCell.token && !visited.has(adjKey)) {
                                     const adjTokenParts = adjCell.token.split('-');
                                     const adjPlayer = parseInt(adjTokenParts[1]);
-                                    
+
                                     if (adjPlayer === player) {
                                         queue.push({ x: adjInfo.x, y: adjInfo.y });
                                         visited.add(adjKey);
@@ -1375,25 +1459,25 @@
                                 }
                             });
                         }
-                        
+
                         // If we found more than one cell (the newly placed one plus at least one existing)
                         if (fusionCells.length > 1) {
                             // Calculate total value
                             let totalValue = 0;
                             let hasChargedCore = false;
-                            
+
                             fusionCells.forEach(cell => {
                                 const cellData = gameState.grid[cell.y][cell.x];
-                                const cellValue = cellData.value || 
-                                          (cellData.token && cellData.token.startsWith('charged') ? 2 : 1);
+                                const cellValue = cellData.value ||
+                                    (cellData.token && cellData.token.startsWith('charged') ? 2 : 1);
                                 totalValue += cellValue;
-                                
+
                                 // Check if any core is charged
                                 if (cellData.token && cellData.token.startsWith('charged')) {
                                     hasChargedCore = true;
                                 }
                             });
-                            
+
                             fusions.push({
                                 cells: fusionCells,
                                 player: player,
@@ -1405,9 +1489,9 @@
                         }
                     }
                 });
-                
+
                 console.log(`Found ${fusions.length} fusions and ${eliminations.length} eliminations`);
-                
+
                 // Now clear the justPlaced flags as we're done with the identification phase
                 for (let y = 0; y < GRID_SIZE; y++) {
                     for (let x = 0; x < GRID_SIZE; x++) {
@@ -1416,7 +1500,7 @@
                         }
                     }
                 }
-                
+
                 // Process all interactions
                 if (fusions.length > 0) {
                     // Animate fusions
@@ -1432,30 +1516,30 @@
                             targetCell: fusion.targetCell
                         });
                     });
-                    
+
                     // Apply fusions after animation
                     setTimeout(() => {
                         applyFusions(fusions);
-                        
+
                         // Check for eliminations by the newly created higher-value cores
                         const postFusionEliminations = [];
                         fusions.forEach(fusion => {
                             const targetCell = fusion.targetCell;
                             console.log(`Checking post-fusion eliminations for core at (${targetCell.x}, ${targetCell.y}) with value ${fusion.newValue}`);
-                            
+
                             // Get adjacent cells to check for eliminations
                             const adjacentCells = getAdjacentCells(targetCell.x, targetCell.y);
                             adjacentCells.forEach(adjInfo => {
                                 const adjCell = adjInfo.cell;
                                 if (!adjCell.token) return;
-                                
+
                                 const adjTokenParts = adjCell.token.split('-');
                                 const adjPlayer = parseInt(adjTokenParts[1]);
                                 const adjTokenType = adjTokenParts[0];
                                 const adjCoreValue = adjCell.value || (adjTokenType === 'energy' ? 1 : 2);
-                                
+
                                 console.log(`Checking post-fusion elimination: Core at (${targetCell.x}, ${targetCell.y}) value ${fusion.newValue} vs adjacent at (${adjInfo.x}, ${adjInfo.y}) value ${adjCoreValue}`);
-                                
+
                                 // If adjacent core belongs to opponent AND has lower value
                                 if (adjPlayer !== fusion.player && fusion.newValue > adjCoreValue) {
                                     console.log(`Found post-fusion elimination at (${adjInfo.x}, ${adjInfo.y}): value ${adjCoreValue} < ${fusion.newValue}`);
@@ -1471,7 +1555,7 @@
                                 }
                             });
                         });
-                        
+
                         // Process any eliminations found after fusions
                         if (postFusionEliminations.length > 0) {
                             setTimeout(() => {
@@ -1509,83 +1593,83 @@
                 const fusions = [];
                 const eliminations = [];
                 const processedCells = new Set(); // Track cells we've processed to avoid duplicates
-                
+
                 // Helper function to add a cell to the processed set
                 const markProcessed = (x, y) => processedCells.add(`${x},${y}`);
                 const isProcessed = (x, y) => processedCells.has(`${x},${y}`);
-                
+
                 // First pass: Find all newly placed tokens
                 const placedTokens = [];
                 for (let y = 0; y < GRID_SIZE; y++) {
                     for (let x = 0; x < GRID_SIZE; x++) {
                         const cell = gameState.grid[y][x];
                         if (!cell.token) continue;
-                        
+
                         // Consider this a "newly placed" token if it was part of the current turn
                         const tokenParts = cell.token.split('-');
                         const player = parseInt(tokenParts[1]);
-                        
+
                         if (player === gameState.currentPlayer) {
                             placedTokens.push({ x, y, player });
                         }
                     }
                 }
-                
+
                 console.log(`Found ${placedTokens.length} tokens from current player`);
-                
+
                 // Process fusion chains
                 placedTokens.forEach(token => {
                     // Skip if this cell was already processed in a previous fusion
                     if (isProcessed(token.x, token.y)) return;
-                    
+
                     // Start a new fusion chain from this token
                     const fusionChain = [];
                     const tokenQueue = [token];
-                    
+
                     // BFS to find all connected tokens of the same player
                     while (tokenQueue.length > 0) {
                         const current = tokenQueue.shift();
-                        
+
                         // Skip if already processed
                         if (isProcessed(current.x, current.y)) continue;
-                        
+
                         // Add to fusion chain and mark as processed
                         fusionChain.push(current);
                         markProcessed(current.x, current.y);
-                        
+
                         // Get adjacent cells with tokens from the same player
                         const adjacentCells = getAdjacentCells(current.x, current.y);
-                        
+
                         adjacentCells.forEach(adjInfo => {
                             const adjCell = adjInfo.cell;
                             if (!adjCell.token) return;
-                            
+
                             const adjTokenParts = adjCell.token.split('-');
                             const adjPlayer = parseInt(adjTokenParts[1]);
-                            
+
                             // If same player and not processed, add to queue
                             if (adjPlayer === current.player && !isProcessed(adjInfo.x, adjInfo.y)) {
-                                tokenQueue.push({ 
-                                    x: adjInfo.x, 
-                                    y: adjInfo.y, 
-                                    player: adjPlayer 
+                                tokenQueue.push({
+                                    x: adjInfo.x,
+                                    y: adjInfo.y,
+                                    player: adjPlayer
                                 });
                             }
                         });
                     }
-                    
+
                     // If we found more than 1 token in the chain, it's a fusion
                     if (fusionChain.length > 1) {
                         console.log(`Found fusion chain with ${fusionChain.length} tokens`);
-                        
+
                         // Calculate total value of fusion
                         let totalValue = 0;
                         fusionChain.forEach(cell => {
-                            const cellValue = gameState.grid[cell.y][cell.x].value || 
-                                              (gameState.grid[cell.y][cell.x].token.startsWith('charged') ? 2 : 1);
+                            const cellValue = gameState.grid[cell.y][cell.x].value ||
+                                (gameState.grid[cell.y][cell.x].token.startsWith('charged') ? 2 : 1);
                             totalValue += cellValue;
                         });
-                        
+
                         fusions.push({
                             cells: fusionChain.map(cell => ({ x: cell.x, y: cell.y })),
                             player: token.player,
@@ -1593,25 +1677,25 @@
                         });
                     }
                 });
-                
+
                 // Reset processed cells tracker for eliminations
                 processedCells.clear();
-                
+
                 // Check for eliminations by checking all opponent tokens adjacent to current player tokens
                 placedTokens.forEach(token => {
                     const adjacentCells = getAdjacentCells(token.x, token.y);
-                    
+
                     adjacentCells.forEach(adjInfo => {
                         const adjCell = adjInfo.cell;
                         if (!adjCell.token) return;
-                        
+
                         const adjTokenParts = adjCell.token.split('-');
                         const adjPlayer = parseInt(adjTokenParts[1]);
-                        
+
                         // If opponent token and not already processed
                         if (adjPlayer !== token.player && !isProcessed(adjInfo.x, adjInfo.y)) {
                             markProcessed(adjInfo.x, adjInfo.y);
-                            
+
                             // Add to eliminations
                             eliminations.push({
                                 x: adjInfo.x,
@@ -1625,7 +1709,7 @@
                         }
                     });
                 });
-                
+
                 console.log(`Found ${fusions.length} fusions and ${eliminations.length} eliminations`);
                 return { fusions, eliminations };
             } catch (error) {
@@ -1647,12 +1731,16 @@
                     console.log(`Applying fusion: ${fusion.cells.length} cells with new value ${fusion.newValue}`);
 
                     let targetCell = fusion.targetCell; // Default to newly placed core
+                    console.log(`Original target cell: (${targetCell.x}, ${targetCell.y})`);
+
 
                     // Check if anchorCell is valid and on the board
                     if (gameState.anchorCell &&
                         gameState.anchorCell.x >= 0 && gameState.anchorCell.x < GRID_SIZE &&
                         gameState.anchorCell.y >= 0 && gameState.anchorCell.y < GRID_SIZE &&
                         gameState.grid[gameState.anchorCell.y][gameState.anchorCell.x]) {  // Make sure the cell exists!
+
+                        console.log("Anchor cell found and is valid!");
                         targetCell = { x: gameState.anchorCell.x, y: gameState.anchorCell.y };
                         console.log(`Fusion target overridden by anchor cell at (${targetCell.x}, ${targetCell.y})`);
                     } else {
@@ -1687,13 +1775,12 @@
             }
         }
 
-
         // Process eliminations
         function processEliminations(eliminations) {
             try {
                 console.log("\n----- Processing Eliminations -----");
                 console.log(`Processing ${eliminations.length} eliminations`);
-                
+
                 if (!eliminations || eliminations.length === 0) {
                     console.log("No eliminations to process");
                     finishTurn();
@@ -1705,7 +1792,7 @@
                     console.log(`- Token: ${elim.token}`);
                     console.log(`- Value: ${elim.value}`);
                     console.log(`- Eliminated by Player ${elim.eliminatedBy + 1}`);
-                    
+
                     // Add elimination animation
                     animations.push({
                         type: 'elimination',
@@ -1717,49 +1804,49 @@
                         duration: 50
                     });
                 });
-                
+
                 // Calculate total value of eliminated cores
                 let totalEliminatedValue = 0;
-                
+
                 // Group eliminations by player to correctly update charged counts
                 const eliminationsByPlayer = {};
-                
+
                 eliminations.forEach(elim => {
                     // Get the value of the core (energy=1, charged=2 or specified value)
                     const value = elim.value || (elim.tokenType === 'energy' ? 1 : 2);
                     totalEliminatedValue += value;
-                    
+
                     // Track eliminations by player to update charged core counts
                     if (!eliminationsByPlayer[elim.player]) {
                         eliminationsByPlayer[elim.player] = 0;
                     }
                     eliminationsByPlayer[elim.player]++;
-                    
+
                     console.log(`[DEBUG] Elimination: Player ${elim.player}'s ${elim.tokenType} core (value: ${value})`);
-                    
+
                     // Remove token from the grid
                     gameState.grid[elim.y][elim.x].token = null;
                     gameState.grid[elim.y][elim.x].value = null;
                 });
-                
+
                 console.log("[DEBUG] Eliminations by player:", eliminationsByPlayer);
-                
+
                 // Return the eliminated cores to their owners as charged cores
                 for (const [playerId, count] of Object.entries(eliminationsByPlayer)) {
                     const playerIndex = parseInt(playerId);
                     const oldCount = gameState.players[playerIndex].chargedTokens;
-                    
+
                     // Increment player's charged tokens
                     gameState.players[playerIndex].chargedTokens += count;
-                    
+
                     console.log(`[DEBUG] Player ${playerIndex + 1} charged cores: ${oldCount} -> ${gameState.players[playerIndex].chargedTokens} (+${count})`);
                 }
-                
+
                 // Award points to current player
                 if (totalEliminatedValue > 0) {
                     gameState.players[gameState.currentPlayer].score += totalEliminatedValue;
                     console.log(`[DEBUG] Player ${gameState.currentPlayer + 1} gains ${totalEliminatedValue} points`);
-                    
+
                     animations.push({
                         type: 'score-update',
                         player: gameState.currentPlayer,
@@ -1768,11 +1855,11 @@
                         duration: 60
                     });
                 }
-                
+
                 // Force re-render of player cards
                 console.log("[DEBUG] Final charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
                 updatePlayerCards();
-                
+
                 // Process after animations
                 setTimeout(() => {
                     console.log("[DEBUG] Post-timeout charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
@@ -1822,7 +1909,7 @@
         // Check for eliminations
         function checkEliminations() {
             const eliminations = [];
-            
+
             // Check for surrounded opponent tokens (horizontally, vertically, diagonally)
             const directions = [
                 { dx: 1, dy: 0 },   // right
@@ -1834,42 +1921,42 @@
                 { dx: 1, dy: -1 },  // up-right
                 { dx: -1, dy: 1 }   // down-left
             ];
-            
+
             for (let y = 0; y < GRID_SIZE; y++) {
                 for (let x = 0; x < GRID_SIZE; x++) {
                     const cell = gameState.grid[y][x];
                     if (!cell.token) continue;
-                    
+
                     // Get player from token
                     const tokenParts = cell.token.split('-');
                     const tokenType = tokenParts[0];
                     const defender = parseInt(tokenParts[1]);
-                    
+
                     // For each possible attacker
                     for (let attacker = 0; attacker < 2; attacker++) {
                         // Skip if checking against own tokens
                         if (attacker === defender) continue;
-                        
+
                         // Count surrounding attacker tokens
                         let surroundCount = 0;
-                        
+
                         directions.forEach(dir => {
                             const nx = x + dir.dx;
                             const ny = y + dir.dy;
-                            
+
                             if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
                                 const neighborCell = gameState.grid[ny][nx];
                                 if (neighborCell.token) {
                                     const neighborTokenParts = neighborCell.token.split('-');
                                     const neighborPlayer = parseInt(neighborTokenParts[1]);
-                                    
+
                                     if (neighborPlayer === attacker) {
                                         surroundCount++;
                                     }
                                 }
                             }
                         });
-                        
+
                         // If surrounded by at least 3 attacker tokens, mark for elimination
                         if (surroundCount >= 3) {
                             eliminations.push({
@@ -1885,7 +1972,7 @@
                     }
                 }
             }
-            
+
             return eliminations;
         }
 
@@ -1894,16 +1981,16 @@
             eliminations.forEach(elim => {
                 // Remove token
                 gameState.grid[elim.y][elim.x].token = null;
-                
+
                 // Award points to attacker
                 const tokenParts = elim.token.split('-');
                 const tokenType = tokenParts[0];
-                
+
                 // 1 point for energy token, 3 for charged
                 const points = tokenType === 'energy' ? 1 : 3;
                 gameState.players[elim.attacker].score += points;
             });
-            
+
             // Update player cards
             updatePlayerCards();
         }
@@ -1937,16 +2024,16 @@
 
         // Check if the game has ended
         function checkGameEnd() {
-            const winner = gameState.players[0].score >= WINNING_SCORE ? 0 : 
-                          gameState.players[1].score >= WINNING_SCORE ? 1 : -1;
-                          
+            const winner = gameState.players[0].score >= WINNING_SCORE ? 0 :
+                gameState.players[1].score >= WINNING_SCORE ? 1 : -1;
+
             if (winner >= 0) {
                 gameState.gameOver = true;
                 document.getElementById('gameStatus').textContent = `Game Over! ${gameState.players[winner].name} wins!`;
-                
+
                 // Disable further interactions
                 gameState.turnPhase = 'gameover';
-                
+
                 // Add victory animation
                 addVictoryAnimation(winner);
                 return true;
@@ -1963,7 +2050,7 @@
                 const angle = Math.random() * Math.PI * 2;
                 const speed = 1 + Math.random() * 4;
                 const lifespan = 80 + Math.random() * 120;
-                
+
                 particles.push({
                     x,
                     y,
@@ -1976,7 +2063,7 @@
                     maxLife: lifespan
                 });
             }
-            
+
             // Add victory animation to all tokens of the winner
             for (let y = 0; y < GRID_SIZE; y++) {
                 for (let x = 0; x < GRID_SIZE; x++) {
@@ -1984,10 +2071,10 @@
                     if (cell.token) {
                         const tokenParts = cell.token.split('-');
                         const player = parseInt(tokenParts[1]);
-                        
+
                         if (player === winner) {
                             cell.glow = 1; // Start glowing
-                            
+
                             // Add pulse animation
                             animations.push({
                                 type: 'victory-pulse',
@@ -2046,23 +2133,23 @@
                 if (!gameReadyToRender) {
                     return; // Skip updates until game is ready
                 }
-                
+
                 // Update animations
                 animations = animations.filter(anim => {
                     anim.progress++;
                     return anim.progress < anim.duration;
                 });
-                
+
                 // Update particles
                 particles = particles.filter(particle => {
                     particle.x += particle.vx;
                     particle.y += particle.vy;
                     particle.life--;
                     particle.alpha = particle.life / particle.maxLife;
-                    
+
                     return particle.life > 0;
                 });
-                
+
                 // Update cell glow
                 if (gameState && gameState.grid) {
                     for (let y = 0; y < GRID_SIZE; y++) {
@@ -2088,34 +2175,34 @@
                     console.log("Render called before game was ready, skipping");
                     return;
                 }
-                
+
                 // Safety check for canvas context
                 if (!ctx) {
                     console.log("Canvas context not available for rendering");
                     return;
                 }
-                
+
                 // Clear canvas
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
+
                 // Draw grid background
                 drawGridBackground();
-                
+
                 // Draw grid lines
                 drawGrid();
-                
+
                 // Safety check for grid before drawing tokens
                 if (!gameState.grid || !gameState.grid.length) {
                     console.error("Grid not initialized for rendering tokens");
                     return;
                 }
-                
+
                 // Draw tokens and selections
                 drawTokensAndSelections();
-                
+
                 // Draw animations
                 drawAnimations();
-                
+
                 // Draw particles
                 drawParticles();
             } catch (error) {
@@ -2131,7 +2218,7 @@
             gradient.addColorStop(1, '#253035');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
+
             // Draw subtle grid pattern
             ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
             for (let y = 0; y < GRID_SIZE; y++) {
@@ -2146,10 +2233,10 @@
                     }
                 }
             }
-            
+
             // Add subtle glow to the grid edges
             const edgeGlow = ctx.createRadialGradient(
-                canvas.width / 2, canvas.height / 2, canvas.width / 4, 
+                canvas.width / 2, canvas.height / 2, canvas.width / 4,
                 canvas.width / 2, canvas.height / 2, canvas.width / 1.5
             );
             edgeGlow.addColorStop(0, 'rgba(255, 255, 255, 0)');
@@ -2162,7 +2249,7 @@
         function drawGrid() {
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
             ctx.lineWidth = 1;
-            
+
             // Draw horizontal lines
             for (let i = 0; i <= GRID_SIZE; i++) {
                 const y = i * cellSize;
@@ -2171,7 +2258,7 @@
                 ctx.lineTo(canvas.width, y);
                 ctx.stroke();
             }
-            
+
             // Draw vertical lines
             for (let i = 0; i <= GRID_SIZE; i++) {
                 const x = i * cellSize;
@@ -2282,42 +2369,42 @@
             ctx.shadowBlur = 10 + glow * 20;
             ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 0;
-            
+
             // Outer circle
             ctx.fillStyle = PLAYER_COLORS[player];
             ctx.beginPath();
             ctx.arc(x, y, radius * (1 + glow * 0.3), 0, Math.PI * 2);
             ctx.fill();
-            
+
             // Reset shadow
             ctx.shadowColor = 'transparent';
             ctx.shadowBlur = 0;
-            
+
             // Inner circle
             ctx.fillStyle = '#f5f5f5';
             ctx.beginPath();
             ctx.arc(x, y, radius * 0.7 * (1 + glow * 0.1), 0, Math.PI * 2);
             ctx.fill();
-            
+
             // Player indicator
             ctx.fillStyle = PLAYER_COLORS[player];
             ctx.beginPath();
             ctx.arc(x, y, radius * 0.4 * (1 + glow * 0.2), 0, Math.PI * 2);
             ctx.fill();
-            
+
             // Highlight
             ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
             ctx.beginPath();
             ctx.arc(x - radius * 0.2, y - radius * 0.2, radius * 0.15, 0, Math.PI * 2);
             ctx.fill();
-            
+
             // Add glow effect
             if (glow > 0) {
                 const glowRadius = radius * (1.2 + glow * 0.5);
                 const gradient = ctx.createRadialGradient(x, y, radius, x, y, glowRadius);
                 gradient.addColorStop(0, PLAYER_GLOW[player]);
                 gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                
+
                 ctx.globalAlpha = glow * 0.7;
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
@@ -2332,72 +2419,72 @@
             // First draw outer glow
             const glowSize = glow * 20;
             const outerGradient = ctx.createRadialGradient(
-                x, y, radius, 
+                x, y, radius,
                 x, y, radius * 1.5 + glowSize
             );
             outerGradient.addColorStop(0, PLAYER_GLOW[player]);
             outerGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            
+
             ctx.globalAlpha = 0.7 + glow * 0.3;
             ctx.fillStyle = outerGradient;
             ctx.beginPath();
             ctx.arc(x, y, radius * 1.5 + glowSize, 0, Math.PI * 2);
             ctx.fill();
             ctx.globalAlpha = 1.0;
-            
+
             // Shadow
             ctx.shadowColor = PLAYER_GLOW[player];
             ctx.shadowBlur = 15 + glow * 25;
             ctx.shadowOffsetX = 0;
             ctx.shadowOffsetY = 0;
-            
+
             // Main circle
             ctx.fillStyle = PLAYER_COLORS[player];
             ctx.beginPath();
             ctx.arc(x, y, radius * (1 + glow * 0.3), 0, Math.PI * 2);
             ctx.fill();
-            
+
             // Reset shadow
             ctx.shadowColor = 'transparent';
             ctx.shadowBlur = 0;
-            
+
             // Energy ring
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
             ctx.lineWidth = radius * 0.15;
             ctx.beginPath();
             ctx.arc(x, y, radius * 0.7, 0, Math.PI * 2);
             ctx.stroke();
-            
+
             // Lightning bolt
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
             ctx.lineWidth = radius * 0.15;
             ctx.lineCap = 'round';
-            
+
             // Draw lightning bolt
             ctx.beginPath();
             ctx.moveTo(x - radius * 0.3, y - radius * 0.4);
             ctx.lineTo(x, y - radius * 0.1);
             ctx.lineTo(x - radius * 0.2, y + radius * 0.4);
             ctx.stroke();
-            
+
             // Highlight
             ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
             ctx.beginPath();
             ctx.arc(x - radius * 0.3, y - radius * 0.3, radius * 0.12, 0, Math.PI * 2);
             ctx.fill();
-            
+
             // Add pulsating effect for charged cores
             if (glow === 0) {
                 const pulseTime = Date.now() / 1000;
                 const pulseFactor = (Math.sin(pulseTime * 3) + 1) * 0.5 * 0.3 + 0.7;
-                
+
                 const pulseGradient = ctx.createRadialGradient(
                     x, y, radius * 0.8 * pulseFactor,
                     x, y, radius * 1.3 * pulseFactor
                 );
                 pulseGradient.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
                 pulseGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                
+
                 ctx.fillStyle = pulseGradient;
                 ctx.beginPath();
                 ctx.arc(x, y, radius * 1.3 * pulseFactor, 0, Math.PI * 2);
@@ -2410,18 +2497,18 @@
             particles.forEach(particle => {
                 ctx.globalAlpha = particle.alpha;
                 ctx.fillStyle = particle.color;
-                
+
                 ctx.shadowColor = particle.color;
                 ctx.shadowBlur = particle.radius * 2;
-                
+
                 ctx.beginPath();
                 ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
                 ctx.fill();
-                
+
                 ctx.shadowColor = 'transparent';
                 ctx.shadowBlur = 0;
             });
-            
+
             ctx.globalAlpha = 1.0;
         }
 
@@ -2447,28 +2534,28 @@
                 }
             });
         }
-        
+
         // Draw score update animation
         function drawScoreUpdateAnimation(anim) {
             try {
                 const progress = anim.progress / anim.duration;
-                
+
                 // Find the player card
                 const playerCard = document.querySelector(`.player${anim.player + 1}`);
                 if (!playerCard) return;
-                
+
                 // Get the score display element
                 const scoreValue = playerCard.querySelector('.stat-value:first-child');
                 if (!scoreValue) return;
-                
+
                 // Get position information
                 const rect = scoreValue.getBoundingClientRect();
                 const canvasRect = canvas.getBoundingClientRect();
-                
+
                 // Calculate position in canvas coordinates
-                const x = rect.left + rect.width/2 - canvasRect.left;
-                const y = rect.top + rect.height/2 - canvasRect.top - (progress * 50);
-                
+                const x = rect.left + rect.width / 2 - canvasRect.left;
+                const y = rect.top + rect.height / 2 - canvasRect.top - (progress * 50);
+
                 // Draw the floating score
                 ctx.font = `bold ${Math.floor(24 * (1 - progress))}px Arial`;
                 ctx.textAlign = 'center';
@@ -2487,20 +2574,20 @@
             const centerX = anim.x * cellSize + cellSize / 2;
             const centerY = anim.y * cellSize + cellSize / 2;
             const progress = anim.progress / anim.duration;
-            
+
             // Scale up from 0 to full size
             const radius = cellSize * 0.4 * Math.min(1, progress * 1.5);
-            
+
             // Glow effect
             const glowSize = cellSize * 0.6 * (1 - Math.min(1, progress * 2));
             if (glowSize > 0) {
                 const gradient = ctx.createRadialGradient(
-                    centerX, centerY, radius, 
+                    centerX, centerY, radius,
                     centerX, centerY, radius + glowSize
                 );
                 gradient.addColorStop(0, PLAYER_GLOW[anim.player]);
                 gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                
+
                 ctx.globalAlpha = 0.7 * (1 - progress);
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
@@ -2508,7 +2595,7 @@
                 ctx.fill();
                 ctx.globalAlpha = 1.0;
             }
-            
+
             // Ripple effect
             if (progress < 0.5) {
                 const rippleSize = cellSize * progress * 2;
@@ -2518,7 +2605,7 @@
                 ctx.arc(centerX, centerY, rippleSize, 0, Math.PI * 2);
                 ctx.stroke();
             }
-            
+
             // Draw the token
             drawEnergyToken(centerX, centerY, radius, anim.player);
         }
@@ -2526,7 +2613,7 @@
         // Draw fusion animation
         function drawFusionAnimation(anim) {
             const progress = anim.progress / anim.duration;
-            
+
             // Calculate center of the fusion
             let centerX = 0, centerY = 0;
             anim.cells.forEach(cell => {
@@ -2535,51 +2622,51 @@
             });
             centerX = centerX / anim.cells.length;
             centerY = centerY / anim.cells.length;
-            
+
             // First half: converge to center
             if (progress < 0.5) {
                 const fadeIn = Math.min(1, progress * 4);
-                
+
                 // Draw connecting energy lines
                 ctx.strokeStyle = PLAYER_COLORS[anim.player];
                 ctx.lineWidth = cellSize * 0.1 * fadeIn;
                 ctx.shadowColor = PLAYER_GLOW[anim.player];
                 ctx.shadowBlur = 15;
-                
+
                 anim.cells.forEach(cell => {
                     const cellCenterX = cell.x * cellSize + cellSize / 2;
                     const cellCenterY = cell.y * cellSize + cellSize / 2;
-                    
+
                     // Calculate progress along line
                     const lineX = cellCenterX + (centerX - cellCenterX) * (progress * 2);
                     const lineY = cellCenterY + (centerY - cellCenterY) * (progress * 2);
-                    
+
                     // Draw energy line
                     ctx.beginPath();
                     ctx.moveTo(cellCenterX, cellCenterY);
                     ctx.lineTo(lineX, lineY);
                     ctx.stroke();
-                    
+
                     // Draw energy particles along the line
                     const particleCount = 3;
                     for (let i = 0; i < particleCount; i++) {
                         const t = (progress * 2) * (i / particleCount);
                         const px = cellCenterX + (centerX - cellCenterX) * t;
                         const py = cellCenterY + (centerY - cellCenterY) * t;
-                        
+
                         ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
                         ctx.beginPath();
                         ctx.arc(px, py, cellSize * 0.05, 0, Math.PI * 2);
                         ctx.fill();
                     }
                 });
-                
+
                 ctx.shadowColor = 'transparent';
                 ctx.shadowBlur = 0;
             } else {
                 // Second half: explosion
                 const explosionProgress = (progress - 0.5) * 2;
-                
+
                 // Draw explosion
                 const explosionRadius = cellSize * 1.5 * explosionProgress;
                 const gradient = ctx.createRadialGradient(
@@ -2589,14 +2676,14 @@
                 gradient.addColorStop(0, PLAYER_COLORS[anim.player]);
                 gradient.addColorStop(0.7, PLAYER_GLOW[anim.player]);
                 gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                
+
                 ctx.globalAlpha = 1 - explosionProgress;
                 ctx.fillStyle = gradient;
                 ctx.beginPath();
                 ctx.arc(centerX, centerY, explosionRadius, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.globalAlpha = 1.0;
-                
+
                 // Add particles
                 if (anim.progress % 3 === 0) {
                     for (let i = 0; i < 5; i++) {
@@ -2604,7 +2691,7 @@
                         const distance = explosionRadius * 0.7;
                         const px = centerX + Math.cos(angle) * distance;
                         const py = centerY + Math.sin(angle) * distance;
-                        
+
                         particles.push({
                             x: px,
                             y: py,
@@ -2618,11 +2705,11 @@
                         });
                     }
                 }
-                
+
                 // Draw new core value at the end
                 if (explosionProgress > 0.7) {
                     const valueProgress = (explosionProgress - 0.7) / 0.3;
-                    
+
                     ctx.font = `bold ${Math.floor(cellSize * 0.5 * valueProgress)}px Arial`;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
@@ -2637,20 +2724,20 @@
             const progress = anim.progress / anim.duration;
             const centerX = anim.target.x * cellSize + cellSize / 2;
             const centerY = anim.target.y * cellSize + cellSize / 2;
-            
+
             try {
                 // First part: attacker energy effect
                 if (progress < 0.7) {
                     const beamProgress = progress / 0.7;
-                    
+
                     ctx.shadowColor = PLAYER_COLORS[anim.attacker];
                     ctx.shadowBlur = 10;
                     ctx.strokeStyle = PLAYER_COLORS[anim.attacker];
                     ctx.lineWidth = cellSize * 0.08 * (1 - Math.abs(beamProgress - 0.5) * 2);
-                    
+
                     // Find all adjacent attacker cores
                     const attackerCores = [];
-                    
+
                     // Get adjacent cells to the target
                     const adjacentDirections = [
                         { dx: 1, dy: 0 },   // right
@@ -2658,36 +2745,36 @@
                         { dx: 0, dy: 1 },   // down
                         { dx: 0, dy: -1 }   // up
                     ];
-                    
+
                     // Check each adjacent cell for attacker cores
                     adjacentDirections.forEach(dir => {
                         const nx = anim.target.x + dir.dx;
                         const ny = anim.target.y + dir.dy;
-                        
+
                         if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
                             const adjCell = gameState.grid[ny][nx];
                             if (adjCell.token) {
                                 const tokenParts = adjCell.token.split('-');
                                 const tokenPlayer = parseInt(tokenParts[1]);
-                                
+
                                 if (tokenPlayer === anim.attacker) {
                                     attackerCores.push({ x: nx, y: ny });
                                 }
                             }
                         }
                     });
-                    
+
                     // Draw beams from attacker cores to the target
                     attackerCores.forEach(attacker => {
                         const attackerX = attacker.x * cellSize + cellSize / 2;
                         const attackerY = attacker.y * cellSize + cellSize / 2;
-                        
+
                         // Draw beam
                         ctx.beginPath();
                         ctx.moveTo(attackerX, attackerY);
                         ctx.lineTo(centerX, centerY);
                         ctx.stroke();
-                        
+
                         // Draw energy particles along the beam
                         const particleCount = 4;
                         for (let i = 0; i < particleCount; i++) {
@@ -2696,33 +2783,33 @@
                             const t = beamProgress * (i / particleCount) + oscillation * 0.05;
                             const px = attackerX + (centerX - attackerX) * t;
                             const py = attackerY + (centerY - attackerY) * t;
-                            
+
                             ctx.fillStyle = 'white';
                             ctx.beginPath();
                             ctx.arc(px, py, cellSize * 0.04, 0, Math.PI * 2);
                             ctx.fill();
                         }
                     });
-                    
+
                     ctx.shadowColor = 'transparent';
                     ctx.shadowBlur = 0;
-                    
+
                     // Draw target token with increasing glow/shake
                     const tokenParts = anim.token.split('-');
                     const tokenType = tokenParts[0];
                     const player = parseInt(tokenParts[1]);
-                    
+
                     // Calculate shake offset
                     const shakeAmount = beamProgress * 3;
                     const offsetX = (Math.random() * 2 - 1) * shakeAmount;
                     const offsetY = (Math.random() * 2 - 1) * shakeAmount;
-                    
+
                     // Draw with increasing glow
                     drawEnergyToken(centerX + offsetX, centerY + offsetY, cellSize * 0.4, player, beamProgress);
                 } else {
                     // Explosion effect for the elimination
                     const explosionProgress = (progress - 0.7) / 0.3;
-                    
+
                     // Draw explosion
                     const explosionRadius = cellSize * explosionProgress;
                     const gradient = ctx.createRadialGradient(
@@ -2732,20 +2819,20 @@
                     gradient.addColorStop(0, 'white');
                     gradient.addColorStop(0.3, PLAYER_COLORS[anim.attacker]);
                     gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                    
+
                     ctx.globalAlpha = 1 - explosionProgress * 0.5;
                     ctx.fillStyle = gradient;
                     ctx.beginPath();
                     ctx.arc(centerX, centerY, explosionRadius, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.globalAlpha = 1.0;
-                    
+
                     // Create explosion particles
                     if (anim.progress % 2 === 0 && explosionProgress < 0.5) {
                         for (let i = 0; i < 3; i++) {
                             const angle = Math.random() * Math.PI * 2;
                             const speed = 1 + Math.random() * 3;
-                            
+
                             particles.push({
                                 x: centerX,
                                 y: centerY,
@@ -2759,11 +2846,11 @@
                             });
                         }
                     }
-                    
+
                     // Draw "Returned" indicator at the end
                     if (explosionProgress > 0.6) {
                         const textProgress = (explosionProgress - 0.6) / 0.4;
-                        
+
                         ctx.font = `bold ${Math.floor(cellSize * 0.3 * textProgress)}px Arial`;
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
@@ -2781,30 +2868,30 @@
             const progress = anim.progress / anim.duration;
             const x = anim.x * cellSize + cellSize / 2;
             const y = anim.y * cellSize + cellSize / 2;
-            
+
             // Pulse glow around the token
             const pulseSize = cellSize * 0.6 * Math.sin(progress * Math.PI);
-            
+
             const gradient = ctx.createRadialGradient(
                 x, y, cellSize * 0.4,
                 x, y, cellSize * 0.4 + pulseSize
             );
             gradient.addColorStop(0, PLAYER_GLOW[anim.player]);
             gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            
+
             ctx.globalAlpha = 0.7 * (1 - progress);
             ctx.fillStyle = gradient;
             ctx.beginPath();
             ctx.arc(x, y, cellSize * 0.4 + pulseSize, 0, Math.PI * 2);
             ctx.fill();
             ctx.globalAlpha = 1.0;
-            
+
             // Add particles at peak
             if (progress > 0.45 && progress < 0.55 && anim.progress % 3 === 0) {
                 for (let i = 0; i < 2; i++) {
                     const angle = Math.random() * Math.PI * 2;
                     const distance = cellSize * 0.5;
-                    
+
                     particles.push({
                         x: x + Math.cos(angle) * distance,
                         y: y + Math.sin(angle) * distance,
@@ -2818,7 +2905,7 @@
                     });
                 }
             }
-            
+
             // Update cell glow for victory effect
             if (progress > 0.8) {
                 gameState.grid[anim.y][anim.x].glow = 0.8;
@@ -2828,66 +2915,66 @@
         // Initialize game when DOM is fully loaded
         function init() {
             console.log("Starting initialization...");
-            
+
             try {
                 // Safety check - don't initialize multiple times
                 if (window.gameInitialized) {
                     console.log("Game already initialized, skipping");
                     return;
                 }
-                
+
                 window.gameInitialized = true;
                 console.log("Game initialization flag set");
-                
+
                 // Initialize grid first to ensure it's ready
                 initGrid();
                 console.log("Grid initialized FIRST in the sequence");
-                
+
                 // Get canvas explicitly
                 canvas = document.getElementById('gameCanvas');
-                
+
                 if (!canvas) {
                     console.error("Could not find the gameCanvas element!");
                     alert("Error: Could not find the game canvas. Please refresh the page.");
                     return;
                 }
-                
+
                 // Get context
                 ctx = canvas.getContext('2d');
-                
+
                 if (!ctx) {
                     console.error("Could not get 2D context from canvas!");
                     alert("Error: Could not initialize the game canvas. Please try a different browser.");
                     return;
                 }
-                
+
                 console.log("Canvas and context obtained successfully");
-                
+
                 // Set up player cards first before any rendering
                 createPlayerCards();
                 console.log("Player cards created successfully");
-                
+
                 // Resize canvas (but don't render yet)
                 resizeCanvasWithoutRendering();
                 console.log("Canvas resized without rendering");
-                
+
                 // Set up all event listeners directly
                 setupEventListeners();
-                
+
                 // Now set the ready flag
                 gameReadyToRender = true;
                 console.log("Game ready to render flag set");
-                
+
                 // Start the game loop only when everything is ready
                 gameLoop();
-                
+
                 console.log("Game initialization complete");
             } catch (error) {
                 console.error("Initialization error:", error);
                 alert("Game initialization failed. Please reload the page.");
             }
         }
-        
+
         // Separate function to set up all event listeners
         function setupEventListeners() {
             try {
@@ -2896,7 +2983,7 @@
                     canvas.onclick = handleCanvasClick;
                     console.log("Canvas click listener attached");
                 }
-                
+
                 // Setup End Turn button
                 const endTurnBtn = document.getElementById('endTurnBtn');
                 if (endTurnBtn) {
@@ -2906,7 +2993,7 @@
                     };
                     console.log("End turn button listener attached");
                 }
-                
+
                 // Help button
                 const helpBtn = document.getElementById('helpBtn');
                 if (helpBtn) {
@@ -2916,7 +3003,7 @@
                     };
                     console.log("Help button listener attached");
                 }
-                
+
                 // Close modal button
                 const closeModalBtn = document.getElementById('closeModal');
                 if (closeModalBtn) {
@@ -2927,7 +3014,7 @@
                     console.log("Close modal button listener attached");
                 }
 
-                 // Hook up event listeners in the setupEventListeners function
+                // Hook up event listeners in the setupEventListeners function
                 // Settings button
                 const settingsBtn = document.getElementById('settingsBtn');
                 if (settingsBtn) {
@@ -2957,16 +3044,16 @@
                     };
                     console.log("Apply settings button listener attached");
                 }
-                
+
                 // Window resize listener
                 window.addEventListener('resize', resizeCanvas);
-                
+
                 console.log("All event listeners attached successfully");
             } catch (error) {
                 console.error("Error setting up event listeners:", error);
             }
         }
-        
+
         // Resize canvas without triggering render
         function resizeCanvasWithoutRendering() {
             try {
@@ -2975,13 +3062,13 @@
                 canvas.width = size;
                 canvas.height = size;
                 cellSize = size / GRID_SIZE;
-                
+
                 console.log(`Canvas resized to ${size}x${size}, cell size: ${cellSize}`);
             } catch (error) {
                 console.error("Error resizing canvas:", error);
             }
         }
-        
+
         // Use both initialization methods with window.onload as primary for full reliability
         window.onload = init;
 
@@ -3008,4 +3095,5 @@
         }
     </script>
 </body>
+
 </html>
