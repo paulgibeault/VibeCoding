@@ -97,8 +97,46 @@
             z-index: 1;
         }
 
+        /* Style for the countdown */
+        .surge-countdown {
+            font-size: 0.9rem;
+            color: var(--tertiary-color);
+            margin-left: 15px; /* Space it from the turn info */
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 200, 87, 0.5);
+        }
+
+        /* Style for the surge animation overlay (optional, if needed) */
+        .surge-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255, 255, 150, 0.6), rgba(62, 205, 193, 0.6), rgba(255, 90, 95, 0.6));
+            mix-blend-mode: lighten; /* Or screen, overlay */
+            pointer-events: none;
+            opacity: 0;
+            z-index: 50; /* Above cards, below modal */
+            transition: opacity 0.3s ease-out;
+        }
+
+        .surge-overlay.active {
+            opacity: 1;
+            animation: surge-wipe 0.8s ease-in-out forwards;
+        }
+
+        @keyframes surge-wipe {
+             0% { transform: translateY(-100%); opacity: 0; }
+             30% { transform: translateY(0%); opacity: 0.7; }
+             70% { transform: translateY(0%); opacity: 0.7; }
+             100% { transform: translateY(100%); opacity: 0; }
+        }
+
         /* Player cards */
         .player-cards {
+            position: relative; /* Needed for z-index stacking */
+            z-index: 10;
             display: flex;
             flex-direction: column;
             justify-content: space-around;
@@ -113,13 +151,27 @@
             margin-top: 10px;
         }
 
+        /* Charged Core Icon Styling */
         .charged-core-icon {
-            width: 20px;
-            height: 20px;
-            margin: 0 5px;
-            background: radial-gradient(circle at center, var(--secondary-color), #27918a);
+            width: 22px; /* Slightly larger */
+            height: 22px;
+            margin: 0 4px; /* Adjust spacing */
             border-radius: 50%;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.3), inset 0 0 4px rgba(0,0,0,0.2);
+            position: relative; /* Needed for positioning the value */
+            display: inline-flex; /* Use flex to center value */
+            justify-content: center;
+            align-items: center;
+            font-size: 10px; /* Base size for value */
+            font-weight: bold;
+            color: #1a252a; /* Dark contrast for value */
+            text-shadow: 0px 0px 2px rgba(255,255,255,0.5); /* Subtle highlight */
+        }
+
+        /* Value Display within the Core Icon */
+        .charged-core-value {
+             /* Value is now directly centered by the parent flex container */
+             line-height: 1; /* Ensure tight vertical alignment */
         }
 
         .player-card {
@@ -563,6 +615,11 @@
                     <label for="chargedCoreValue">Charged Core Value:</label>
                     <input type="number" id="chargedCoreValue" min="1" value="3">
                 </div>
+                <!-- Add this setting -->
+                <div class="setting-row">
+                    <label for="turnsPerPlayerPerRound">Turns Per Player Per Round:</label>
+                    <input type="number" id="turnsPerPlayerPerRound" min="1" value="1">
+                </div>
                 <div class="setting-row">
                     <label for="winningScore">Winning Score:</label>
                     <input type="number" id="winningScore" min="10" value="20">
@@ -572,7 +629,9 @@
         </div>
     </div>
 
+
     <div class="game-container">
+        <div class="surge-overlay" id="surgeOverlay"></div>
         <div class="game-header">
             <h1>ENERGY GRID</h1>
             <p>A strategic battle of energy cores and fusion reactions</p>
@@ -597,6 +656,8 @@
         <div class="game-info">
             <div class="turn-info">
                 <p>Current Turn: <span id="currentPlayer">Player 1</span></p>
+                <!-- Add this span for the countdown -->
+                <p class="surge-countdown">Energy Surge In: <span id="surgeCountdown">?</span> turns</p>
             </div>
             <div class="game-status">
                 <p id="gameStatus">Game in progress...</p>
@@ -659,6 +720,7 @@
         console.log("Script loading");
 
         // Game constants
+        const NUM_PLAYERS = 2; // Explicitly define number of players
         const GRID_SIZE = 8;
         const PLAYER_COLORS = ['#FF5A5F', '#3ECDC1']; // Player 1, Player 2
         const PLAYER_GLOW = ['rgba(255, 90, 95, 0.7)', 'rgba(62, 205, 193, 0.7)']; // Player 1, Player 2 glow
@@ -669,8 +731,8 @@
         let gameState = {
             currentPlayer: 0, // 0 or 1
             players: [
-                { name: PLAYER_NAMES[0], score: 0, chargedTokens: 0 }, // Changed to 0
-                { name: PLAYER_NAMES[1], score: 0, chargedTokens: 0 }  // Changed to 0
+                { name: PLAYER_NAMES[0], score: 0, chargedCores: [] },
+                { name: PLAYER_NAMES[1], score: 0, chargedCores: [] }
             ],
             grid: [], // Will be initialized as 2D array
             selectedCells: [], // Cells selected for token placement
@@ -678,7 +740,9 @@
             turnPhase: 'selecting', // 'selecting' or 'animation'
             placedEnergyToken: false, // Flag to track if energy token has been placed
             gameOver: false,
-            anchorCell: null
+            anchorCell: null,
+            turnInRound: 0,
+            turnsPerPlayerPerRound: 1 // Default, will be set by settings
         };
 
         // Canvas and rendering variables
@@ -821,28 +885,25 @@
         // Update player cards with current game state
         function updatePlayerCards() {
             console.log("[DEBUG] Updating player cards");
-
             const playerCardsContainer = document.querySelector('.player-cards');
-
             if (!playerCardsContainer) {
                 console.error("[DEBUG] Player cards container not found!");
                 return;
             }
-
             playerCardsContainer.innerHTML = '';
 
             gameState.players.forEach((player, index) => {
                 const playerCard = document.createElement('div');
-                playerCard.className = `player-card player${index + 1}`;
-                if (index === gameState.currentPlayer) {
-                    playerCard.classList.add('active');
-                }
+                playerCard.className = `player-card player${index + 1} ${index === gameState.currentPlayer ? 'active' : ''}`;
 
-                // Dynamically generate charged core icons with player-specific color
-                const chargedCoresHTML = Array(player.chargedTokens).fill().map(() => {
-                    const backgroundColor = PLAYER_COLORS[index]; // Get player's color
-                    const lighterColor = adjustColorBrightness(backgroundColor, 0.8); //Lighter for gradient
-                    return `<i class="charged-core-icon" style="background: radial-gradient(circle at center, ${backgroundColor}, ${lighterColor});"></i>`;
+                // *** Generate icons based on the chargedCores array ***
+                const chargedCoresHTML = player.chargedCores.map(coreValue => {
+                    const backgroundColor = PLAYER_COLORS[index];
+                    const lighterColor = adjustColorBrightness(backgroundColor, 1.3); // Lighter for gradient
+                    // Include the value inside the icon structure
+                    return `<i class="charged-core-icon" style="background: radial-gradient(circle at 60% 40%, ${lighterColor}, ${backgroundColor});">
+                                <span class="charged-core-value">${coreValue}</span>
+                            </i>`;
                 }).join('');
 
                 playerCard.innerHTML = `
@@ -854,17 +915,16 @@
                             <div class="stat-label">Score</div>
                         </div>
                     </div>
-                    <div class="charged-cores">
-                        ${chargedCoresHTML}
+                    <div class="charged-cores" title="Charged Cores (Value)">
+                        ${chargedCoresHTML || '<span style="font-size: 0.8em; opacity: 0.7;">No charged cores</span>'}
                     </div>
                 `;
-
                 playerCardsContainer.appendChild(playerCard);
-                console.log(`[DEBUG] Updated card for Player ${index + 1} - Score: ${player.score}, Charged: ${player.chargedTokens}`);
+                console.log(`[DEBUG] Updated card for Player ${index + 1} - Score: ${player.score}, Charged Cores: [${player.chargedCores.join(', ')}]`);
             });
-
             console.log("[DEBUG] Player cards update complete");
         }
+
 
         function adjustColorBrightness(hex, factor) {
             // Remove the '#' character, if present
@@ -1002,171 +1062,119 @@
         // 3a. Deselect Cell
         function deselectCell(x, y, cell) {
             console.log("[DEBUG - CLICK] Deselecting cell at (" + x + ", " + y + ")");
+            const player = gameState.players[gameState.currentPlayer];
 
-            // Find the cell in selectedCells
-            const index = gameState.selectedCells.findIndex(
-                selected => selected.x === x && selected.y === y
-            );
+            const index = gameState.selectedCells.findIndex(selected => selected.x === x && selected.y === y);
 
             if (index !== -1) {
                 const deselectedCellInfo = gameState.selectedCells[index];
-                console.log(`[DEBUG - CLICK] Found cell to deselect at index ${index}, type: ${deselectedCellInfo.type}`);
+                console.log(`[DEBUG - CLICK] Found cell to deselect at index ${index}, type: ${deselectedCellInfo.type}, value: ${deselectedCellInfo.value}`);
 
-                // *** CORE FIX START ***
-                // Check if the deselected core is the 'energy' (anchor) core
                 if (deselectedCellInfo.type === 'energy') {
                     console.log("[DEBUG - CLICK] Anchor/Energy core deselected. Resetting all turn selections.");
-
-                    // 1. Refund all charged cores selected *this turn*
-                    let refundedChargedCores = 0;
+                    let refundedCoresInfo = [];
                     gameState.selectedCells.forEach(selected => {
                         if (selected.type === 'charged') {
-                            refundedChargedCores++;
+                            // Return the *value* back to the player's array
+                            player.chargedCores.push(selected.value);
+                            refundedCoresInfo.push(selected.value);
                         }
-                        // 2. Visually deselect all grid cells that were part of this turn's selection
                         try {
-                        gameState.grid[selected.y][selected.x].selected = false;
-                        } catch(e){
+                            gameState.grid[selected.y][selected.x].selected = false;
+                        } catch (e) {
                             console.warn(`Error visually deselecting ${selected.x},${selected.y}: ${e.message}`);
                         }
                     });
 
-                    if (refundedChargedCores > 0) {
-                        const oldCount = gameState.players[gameState.currentPlayer].chargedTokens;
-                        gameState.players[gameState.currentPlayer].chargedTokens += refundedChargedCores;
-                        console.log(`[DEBUG - CLICK] Returned ${refundedChargedCores} charged cores due to anchor deselect. Player ${gameState.currentPlayer + 1} count: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedTokens}`);
-                        updatePlayerCards(); // Update UI immediately
+                    if (refundedCoresInfo.length > 0) {
+                         console.log(`[DEBUG - CLICK] Returned ${refundedCoresInfo.length} charged cores with values [${refundedCoresInfo.join(', ')}] due to anchor deselect. Player ${gameState.currentPlayer + 1} cores: [${player.chargedCores.join(', ')}]`);
+                         updatePlayerCards(); // Update UI immediately
                     }
 
-                    // 3. Clear the entire selectedCells array for the turn
                     gameState.selectedCells = [];
-                    console.log("[DEBUG - CLICK] selectedCells array cleared.");
-
-                    // 4. Reset the energy token placement flag
                     gameState.placedEnergyToken = false;
-                    console.log("[DEBUG - CLICK] placedEnergyToken reset to false.");
-
-                    // 5. Reset the anchor cell
                     gameState.anchorCell = null;
-                    console.log("[DEBUG - CLICK] anchorCell reset to null.");
-
+                    console.log("[DEBUG - CLICK] selectedCells, placedEnergyToken, anchorCell reset.");
                     updateGameStatus("Selection cleared. Place energy core first.");
 
-
-                } else {
-                    // Deselecting a 'charged' core (original logic is mostly fine for this case)
+                } else { // Deselecting a 'charged' core
                     console.log("[DEBUG - CLICK] Deselecting a charged core.");
-                    const oldCount = gameState.players[gameState.currentPlayer].chargedTokens;
-                    // Return the charged core to the player's count
-                    gameState.players[gameState.currentPlayer].chargedTokens++;
-                    console.log(`[DEBUG - CLICK] Returned 1 charged core. Player ${gameState.currentPlayer + 1} count: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedTokens}`);
-                    updatePlayerCards(); // Update UI immediately
+                    // Return the specific core's value
+                    player.chargedCores.push(deselectedCellInfo.value);
+                    console.log(`[DEBUG - CLICK] Returned charged core with value ${deselectedCellInfo.value}. Player ${gameState.currentPlayer + 1} cores: [${player.chargedCores.join(', ')}]`);
+                    updatePlayerCards();
 
-                    // Remove just this one cell from selectedCells
                     gameState.selectedCells.splice(index, 1);
                     console.log("[DEBUG - CLICK] Cell removed from selectedCells, new count:", gameState.selectedCells.length);
-
-                    // Visually deselect only this grid cell
-                    cell.selected = false;
+                    cell.selected = false; // Visual deselection
                     updateGameStatus("Charged core deselected.");
 
-                    // If this was the last selected cell, reset the anchor just in case
-                    // (Though this shouldn't happen if energy was placed first)
                     if (gameState.selectedCells.length === 0) {
-                    console.log("[DEBUG - CLICK] Last selected cell deselected, ensuring anchor/energy flags are reset.");
-                    gameState.placedEnergyToken = false; // Should already be false if only energy was selected then deselected
-                    gameState.anchorCell = null;
+                       console.log("[DEBUG - CLICK] Last selected cell deselected, ensuring anchor/energy flags reset.");
+                       gameState.placedEnergyToken = false;
+                       gameState.anchorCell = null;
                     }
                 }
-                // *** CORE FIX END ***
-
             } else {
-                console.warn(`[DEBUG - CLICK] Could not find cell (${x}, ${y}) in selectedCells array to deselect.`);
-                // Attempt to visually deselect anyway, just in case state is inconsistent
-                cell.selected = false;
+                 console.warn(`[DEBUG - CLICK] Could not find cell (${x}, ${y}) in selectedCells array to deselect.`);
+                 cell.selected = false; // Attempt visual deselection anyway
             }
-
-            // Force re-render after any deselection
-            render();
+             render(); // Re-render after any deselection
         }
+
 
         // 3b. Select Cell
         function selectCell(x, y, cell) {
             console.log("[DEBUG - CLICK] Attempting to select empty cell");
+            const player = gameState.players[gameState.currentPlayer];
 
-            // Check if energy token has been placed
             if (!gameState.placedEnergyToken && gameState.selectedCells.length > 0) {
-                console.log("[DEBUG - CLICK] Energy token must be placed first");
-                updateGameStatus("Energy token must be placed first", true);
-                setTimeout(() => {
-                    updateGameStatus("Game in progress...");
-                }, 2000);
+                updateGameStatus("Energy core must be placed first", true);
+                setTimeout(() => updateGameStatus("Game in progress..."), 2000);
                 return;
             }
 
-            // Determine token type based on selection count
             const tokenType = gameState.selectedCells.length === 0 ? 'energy' : 'charged';
 
-            // Check if attempting to place energy token when already placed
             if (tokenType === 'energy' && gameState.placedEnergyToken) {
-                console.log("[DEBUG - CLICK] Energy token already placed");
                 updateGameStatus("Energy core already placed", true);
-                setTimeout(() => {
-                    updateGameStatus("Game in progress...");
-                }, 2000);
+                setTimeout(() => updateGameStatus("Game in progress..."), 2000);
                 return;
             }
 
-            // If trying to place a charged token when none are available
-            if (tokenType === 'charged' && gameState.players[gameState.currentPlayer].chargedTokens === 0) {
-                console.log("[DEBUG - CLICK] No charged cores available");
-                updateGameStatus("No charged cores available!", true);
-                setTimeout(() => {
-                    updateGameStatus("Game in progress...");
-                }, 2000);
-                return;
+            // *** Modify Charged Core Selection Logic ***
+            let coreValueToPlace = 1; // Default for energy core
+            if (tokenType === 'charged') {
+                // Check if player has any charged cores left
+                if (player.chargedCores.length === 0) {
+                    console.log("[DEBUG - CLICK] No charged cores available");
+                    updateGameStatus("No charged cores available!", true);
+                    setTimeout(() => updateGameStatus("Game in progress..."), 2000);
+                    return;
+                }
+                // Get the value of the core being placed (e.g., the last one)
+                // and remove it from the player's hand
+                coreValueToPlace = player.chargedCores.pop(); // Remove last core & get its value
+                 console.log(`[DEBUG - CLICK] Using charged core with value ${coreValueToPlace}. Player ${gameState.currentPlayer + 1} remaining cores: [${player.chargedCores.join(', ')}]`);
+                updatePlayerCards(); // Update UI immediately
+                updateGameStatus("Charged core selected");
             }
 
-            // Calculate Max Selections using tokenType as a condition
-            let availableCores = gameState.players[gameState.currentPlayer].chargedTokens;
-
-            console.log(`[DEBUG - CLICK] Max selections allowed: ${availableCores}, current selections: ${gameState.selectedCells.filter(cell => cell.type === 'charged').length}`);
-
-            if (tokenType === 'charged' && availableCores <= 0) {
-                console.log(`[DEBUG - CLICK] Cannot select more than ${availableCores} cells`);
-                updateGameStatus(`Cannot place more than ${availableCores} cores in one turn!`, true);
-                setTimeout(() => {
-                    updateGameStatus("Game in progress...");
-                }, 2000);
-                return;
-            }
-
-            // Set anchor cell if this is the first selection of the turn
             if (gameState.selectedCells.length === 0) {
                 gameState.anchorCell = { x: x, y: y };
                 console.log(`[DEBUG - CLICK] Set anchor cell to (${x}, ${y})`);
-                // Optionally, add code to highlight the anchor cell visually (see below)
             }
 
-            // Update energy token placement flag
             if (tokenType === 'energy') {
                 gameState.placedEnergyToken = true;
                 console.log("[DEBUG - CLICK] Energy token selected, placedEnergyToken set to true");
                 updateGameStatus("Energy core selected");
-            } else {
-                const oldCount = gameState.players[gameState.currentPlayer].chargedTokens;
-                // Decrement charged core count when selecting a charged core
-                gameState.players[gameState.currentPlayer].chargedTokens--;
-                console.log(`[DEBUG - CLICK] Used charged core, player ${gameState.currentPlayer + 1} count: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedTokens}`);
-                updatePlayerCards();
-                updateGameStatus("Charged core selected");
             }
 
             cell.selected = true;
-            gameState.selectedCells.push({ x, y, type: tokenType });
-            console.log(`[DEBUG - CLICK] Cell selected at (${x}, ${y}), type: ${tokenType}`);
-
-            // Add selection particles
+            // Store the value along with the selection
+            gameState.selectedCells.push({ x, y, type: tokenType, value: coreValueToPlace });
+            console.log(`[DEBUG - CLICK] Cell selected at (${x}, ${y}), type: ${tokenType}, value: ${coreValueToPlace}`);
             addSelectionParticles(x, y);
         }
 
@@ -1257,8 +1265,9 @@
         }
         // Global variables to store settings
         let startingChargedCores = 1;
-        let chargedCoreValue = 3;
+        let chargedCoreValue = 1;
         let winningScore = 20;
+        let turnsPerPlayerPerRoundSetting = 1; // Default for settings input
 
         // Show settings modal
         function showSettingsModal() {
@@ -1285,65 +1294,67 @@
             }, 300);
         }
 
-        // Apply settings and start a new game
         function applySettingsAndNewGame() {
-            // Get values from input fields
-            startingChargedCores = parseInt(document.getElementById('startingChargedCores').value);
-            chargedCoreValue = parseInt(document.getElementById('chargedCoreValue').value);
-            winningScore = parseInt(document.getElementById('winningScore').value);
+            startingChargedCores = parseInt(document.getElementById('startingChargedCores').value) || 0; // Can start with 0
+            chargedCoreValue = parseInt(document.getElementById('chargedCoreValue').value) || 1; // Min value 1
+            winningScore = parseInt(document.getElementById('winningScore').value) || 20;
+            turnsPerPlayerPerRoundSetting = parseInt(document.getElementById('turnsPerPlayerPerRound').value) || 1;
 
-            // Basic validation
-            if (isNaN(startingChargedCores) || isNaN(chargedCoreValue) || isNaN(winningScore)) {
-                alert("Please enter valid numbers for all settings.");
+            if (isNaN(startingChargedCores) || startingChargedCores < 0 || isNaN(chargedCoreValue) || chargedCoreValue < 1 || isNaN(winningScore) || winningScore < 1 || isNaN(turnsPerPlayerPerRoundSetting) || turnsPerPlayerPerRoundSetting < 1) {
+                alert("Please enter valid numbers (Cores >= 0, Value >= 1, Score >= 1, Turns >= 1).");
                 return;
             }
-
-            // Hide the settings modal
             hideSettingsModal();
-
-            // Start a new game with the applied settings
             newGame();
         }
 
-        // New Game function
         function newGame() {
             console.log("Starting a new game with settings:");
-            console.log("Starting Charged Cores:", startingChargedCores);
-            console.log("Charged Core Value:", chargedCoreValue);
+            console.log("Starting Charged Cores Count:", startingChargedCores);
+            console.log("Initial Charged Core Value:", chargedCoreValue);
             console.log("Winning Score:", winningScore);
+            console.log("Turns Per Player Per Round:", turnsPerPlayerPerRoundSetting);
 
-            // Reset game state
+            // Initialize chargedCores as an array with the correct initial values
+            const initialCoresP1 = Array(startingChargedCores).fill(chargedCoreValue);
+            const initialCoresP2 = Array(startingChargedCores).fill(chargedCoreValue);
+
             gameState = {
                 currentPlayer: 0,
                 players: [
-                    { name: PLAYER_NAMES[0], score: 0, chargedTokens: startingChargedCores },
-                    { name: PLAYER_NAMES[1], score: 0, chargedTokens: startingChargedCores }
+                    { name: PLAYER_NAMES[0], score: 0, chargedCores: initialCoresP1 },
+                    { name: PLAYER_NAMES[1], score: 0, chargedCores: initialCoresP2 }
                 ],
                 grid: [],
                 selectedCells: [],
                 selectionMode: 'energy',
                 turnPhase: 'selecting',
                 placedEnergyToken: false,
-                gameOver: false
+                gameOver: false,
+                anchorCell: null,
+                turnInRound: 0,
+                turnsPerPlayerPerRound: turnsPerPlayerPerRoundSetting
             };
 
-            // Reinitialize the grid
             initGrid();
-
-            // Update the player cards
-            updatePlayerCards();
-
-            // Reset game status
-            document.getElementById('gameStatus').textContent = `${gameState.players[gameState.currentPlayer].name}'s turn`;
-
-            // Switch selection mode back to energy
+            updatePlayerCards(); // Display initial cores
+            updateGameStatus(`${gameState.players[gameState.currentPlayer].name}'s turn`);
+            updateSurgeCountdown();
             setSelectionMode('energy');
 
-            // Restart the game loop (if it was stopped)
+            const surgeOverlay = document.getElementById('surgeOverlay');
+            if (surgeOverlay) {
+                surgeOverlay.classList.remove('active');
+                surgeOverlay.style.opacity = '0';
+            }
+
             if (gameState.gameOver) {
                 gameState.gameOver = false;
-                animations = []; // Clear any victory animations
-                cancelAnimationFrame(animationFrameId); // Stop any stray animation loops
+                animations = [];
+                particles = [];
+                cancelAnimationFrame(animationFrameId);
+                gameLoop();
+            } else if (!animationFrameId) {
                 gameLoop();
             }
         }
@@ -1351,38 +1362,27 @@
         function placeTokens() {
             try {
                 console.log(`Placing ${gameState.selectedCells.length} tokens on the grid`);
-
-                // Keep track of all newly placed tokens
                 const placedPositions = [];
 
                 gameState.selectedCells.forEach(selected => {
-                    const { x, y, type } = selected;
+                    const { x, y, type, value } = selected; // Get value from selected data
 
-                    // Use the configured chargedCoreValue
                     gameState.grid[y][x].token = `${type}-${gameState.currentPlayer}`;
-                    gameState.grid[y][x].value = type === 'energy' ? 1 : chargedCoreValue;
+                    // Use the value associated with the selection for the grid cell
+                    gameState.grid[y][x].value = value; // VALUE IS SET HERE
                     gameState.grid[y][x].selected = false;
-                    gameState.grid[y][x].justPlaced = true; // Mark as just placed for interaction detection
+                    gameState.grid[y][x].justPlaced = true;
 
                     placedPositions.push({ x, y });
-
                     console.log(`Placed ${type} token at (${x}, ${y}) with value ${gameState.grid[y][x].value}`);
 
-                    // Add placement animation
                     animations.push({
                         type: 'placement',
-                        x,
-                        y,
-                        progress: 0,
-                        duration: 40, // animation frames
-                        tokenType: type,
-                        player: gameState.currentPlayer
+                        x, y, progress: 0, duration: 40,
+                        tokenType: type, player: gameState.currentPlayer, value: value // Pass value to animation? (optional)
                     });
-
-                }); // Closing brace for forEach loop
-
-                // Clear selected cells
-                gameState.selectedCells = [];
+                });
+                gameState.selectedCells = []; // Clear after processing
             } catch (error) {
                 console.error("Error placing tokens:", error);
             }
@@ -1778,53 +1778,35 @@
         function applyFusions(fusions) {
             try {
                 console.log("\n----- Applying Fusions -----");
-                if (fusions.length === 0) {
-                    console.log("No fusions to apply");
-                    return;
-                }
-
                 fusions.forEach(fusion => {
                     console.log(`Applying fusion: ${fusion.cells.length} cells with new value ${fusion.newValue}`);
-
-                    let targetCell = fusion.targetCell; // Default to newly placed core
-                    console.log(`Original target cell: (${targetCell.x}, ${targetCell.y})`);
-
-
-                    // Check if anchorCell is valid and on the board
-                    if (gameState.anchorCell &&
-                        gameState.anchorCell.x >= 0 && gameState.anchorCell.x < GRID_SIZE &&
-                        gameState.anchorCell.y >= 0 && gameState.anchorCell.y < GRID_SIZE &&
-                        gameState.grid[gameState.anchorCell.y][gameState.anchorCell.x]) {  // Make sure the cell exists!
-
-                        console.log("Anchor cell found and is valid!");
-                        targetCell = { x: gameState.anchorCell.x, y: gameState.anchorCell.y };
-                        console.log(`Fusion target overridden by anchor cell at (${targetCell.x}, ${targetCell.y})`);
+                    // Determine target cell (prioritize anchor if valid, else use the newCore coord)
+                    let targetCoord = fusion.targetCell;
+                    if (gameState.anchorCell && fusion.cells.some(c => c.x === gameState.anchorCell.x && c.y === gameState.anchorCell.y)) {
+                         console.log("Using anchor cell as fusion target.");
+                         targetCoord = gameState.anchorCell;
                     } else {
-                        console.log("No valid anchor cell found, defaulting to target cell");
+                         console.log("Using newly placed core as fusion target.");
                     }
 
+                    const targetCell = gameState.grid[targetCoord.y][targetCoord.x];
+                    targetCell.token = `${fusion.resultType}-${fusion.player}`;
+                    targetCell.value = fusion.newValue; // Set the calculated total value
+                    targetCell.glow = 1; // Add glow effect
+                    console.log(`Fusion result at (${targetCoord.x}, ${targetCoord.y}): ${targetCell.token} with value ${targetCell.value}`);
 
-                    console.log(`Using target cell for fusion at (${targetCell.x}, ${targetCell.y})`);
-
-                    // Update the target cell's token type and value
-                    gameState.grid[targetCell.y][targetCell.x].token = `${fusion.resultType || 'energy'}-${fusion.player}`;
-                    gameState.grid[targetCell.y][targetCell.x].value = fusion.newValue;
-                    gameState.grid[targetCell.y][targetCell.x].glow = 1;
-
-                    console.log(`Fusion result at (${targetCell.x}, ${targetCell.y}): ${fusion.resultType || 'energy'} token with value ${fusion.newValue}`);
-
-                    // Remove other cells involved in the fusion
-                    for (const cell of fusion.cells) {
-                        if (cell.x !== targetCell.x || cell.y !== targetCell.y) {
-                            console.log(`Removing fused token at (${cell.x}, ${cell.y})`);
-                            gameState.grid[cell.y][cell.x].token = null;
-                            gameState.grid[cell.y][cell.x].value = null;
+                    // Remove other cells involved
+                    fusion.cells.forEach(coord => {
+                        if (coord.x !== targetCoord.x || coord.y !== targetCoord.y) {
+                            console.log(`Removing fused token at (${coord.x}, ${coord.y})`);
+                            const cellToRemove = gameState.grid[coord.y][coord.x];
+                            cellToRemove.token = null;
+                            cellToRemove.value = null; // Clear value too
+                            cellToRemove.glow = 0;
                         }
-                    }
+                    });
                 });
-
-                // Update player cards
-                updatePlayerCards();
+                // Don't update player cards here, happens after eliminations/finishTurn
                 console.log("Fusions applied successfully");
             } catch (error) {
                 console.error("Error applying fusions:", error);
@@ -1835,97 +1817,59 @@
         function processEliminations(eliminations) {
             try {
                 console.log("\n----- Processing Eliminations -----");
+                if (!eliminations || eliminations.length === 0) {
+                    console.log("No eliminations to process.");
+                    finishTurn(); return;
+                }
                 console.log(`Processing ${eliminations.length} eliminations`);
 
-                if (!eliminations || eliminations.length === 0) {
-                    console.log("No eliminations to process");
-                    finishTurn();
-                    return;
-                }
-
-                eliminations.forEach(elim => {
-                    console.log(`\nElimination at (${elim.x}, ${elim.y}):`);
-                    console.log(`- Token: ${elim.token}`);
-                    console.log(`- Value: ${elim.value}`);
-                    console.log(`- Eliminated by Player ${elim.eliminatedBy + 1}`);
-
-                    // Add elimination animation
-                    animations.push({
-                        type: 'elimination',
-                        target: { x: elim.x, y: elim.y },
-                        token: elim.token,
-                        attacker: elim.eliminatedBy,
-                        defender: elim.player,
-                        progress: 0,
-                        duration: 50
-                    });
-                });
-
-                // Calculate total value of eliminated cores
                 let totalEliminatedValue = 0;
-
-                // Group eliminations by player to correctly update charged counts
-                const eliminationsByPlayer = {};
+                // Group values by player whose cores are returned
+                const returnedCoresByPlayer = {}; // { playerIndex: [value1, value2,...] }
 
                 eliminations.forEach(elim => {
-                    // Get the value of the core (energy=1, charged=2 or specified value)
-                    const value = elim.value || (elim.tokenType === 'energy' ? 1 : 2);
-                    totalEliminatedValue += value;
+                    console.log(`Elimination at (${elim.x}, ${elim.y}): Token ${elim.token}, Value ${elim.value}, By Player ${elim.eliminatedBy + 1}`);
+                    animations.push({ /* ... elimination animation data ... */ });
 
-                    // Track eliminations by player to update charged core counts
-                    if (!eliminationsByPlayer[elim.player]) {
-                        eliminationsByPlayer[elim.player] = 0;
+                    totalEliminatedValue += elim.value; // Score based on the core's actual value
+
+                    // Prepare to return the core with its current value
+                    if (!returnedCoresByPlayer[elim.player]) {
+                        returnedCoresByPlayer[elim.player] = [];
                     }
-                    eliminationsByPlayer[elim.player]++;
-
-                    console.log(`[DEBUG] Elimination: Player ${elim.player}'s ${elim.tokenType} core (value: ${value})`);
+                    returnedCoresByPlayer[elim.player].push(elim.value); // Add the value to return
 
                     // Remove token from the grid
-                    gameState.grid[elim.y][elim.x].token = null;
-                    gameState.grid[elim.y][elim.x].value = null;
+                    const cell = gameState.grid[elim.y][elim.x];
+                    cell.token = null;
+                    cell.value = null; // Clear value
                 });
 
-                console.log("[DEBUG] Eliminations by player:", eliminationsByPlayer);
-
-                // Return the eliminated cores to their owners as charged cores
-                for (const [playerId, count] of Object.entries(eliminationsByPlayer)) {
+                // Return cores to owners
+                for (const [playerId, valuesToReturn] of Object.entries(returnedCoresByPlayer)) {
                     const playerIndex = parseInt(playerId);
-                    const oldCount = gameState.players[playerIndex].chargedTokens;
-
-                    // Increment player's charged tokens
-                    gameState.players[playerIndex].chargedTokens += count;
-
-                    console.log(`[DEBUG] Player ${playerIndex + 1} charged cores: ${oldCount} -> ${gameState.players[playerIndex].chargedTokens} (+${count})`);
+                    const player = gameState.players[playerIndex];
+                    const oldCount = player.chargedCores.length;
+                    player.chargedCores.push(...valuesToReturn); // Add returned cores (values) back
+                    console.log(`[DEBUG] Player ${playerIndex + 1} received ${valuesToReturn.length} returned cores with values [${valuesToReturn.join(', ')}]. Charged cores: ${oldCount} -> ${player.chargedCores.length}`);
                 }
 
-                // Award points to current player
+                // Award score to the current player
                 if (totalEliminatedValue > 0) {
                     gameState.players[gameState.currentPlayer].score += totalEliminatedValue;
-                    console.log(`[DEBUG] Player ${gameState.currentPlayer + 1} gains ${totalEliminatedValue} points`);
-
-                    animations.push({
-                        type: 'score-update',
-                        player: gameState.currentPlayer,
-                        value: totalEliminatedValue,
-                        progress: 0,
-                        duration: 60
-                    });
+                    console.log(`[DEBUG] Player ${gameState.currentPlayer + 1} gains ${totalEliminatedValue} points. New score: ${gameState.players[gameState.currentPlayer].score}`);
+                    animations.push({ /* ... score update animation data ... */ });
                 }
 
-                // Force re-render of player cards
-                console.log("[DEBUG] Final charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
-                updatePlayerCards();
+                // Don't update cards yet, wait for finishTurn
+                setTimeout(finishTurn, 600); // Delay for animation before finishing turn
 
-                // Process after animations
-                setTimeout(() => {
-                    console.log("[DEBUG] Post-timeout charged tokens - P1:", gameState.players[0].chargedTokens, "P2:", gameState.players[1].chargedTokens);
-                    finishTurn();
-                }, 600);
             } catch (error) {
                 console.error("Error processing eliminations:", error);
-                finishTurn(); // Try to recover by finishing the turn
+                finishTurn(); // Try to recover
             }
         }
+
 
         // Helper function to get the value of a cell's core
         function getCellValue(x, y) {
@@ -2058,25 +2002,74 @@
             console.log(`Charged tokens - P1: ${gameState.players[0].chargedTokens}, P2: ${gameState.players[1].chargedTokens}`);
             console.log(`Scores - P1: ${gameState.players[0].score}, P2: ${gameState.players[1].score}`);
             console.log("========== TURN END ==========\n");
-            // Check for game end condition
-            if (checkGameEnd()) return;
+
+            if (checkGameEnd()) return; // Check win condition first
+
+            // Increment turn count *within* the round
+            gameState.turnInRound++;
+            console.log(`Turn ${gameState.turnInRound} of round completed.`);
+
+            // Check if the round has ended
+            const totalTurnsPerRound = gameState.turnsPerPlayerPerRound * NUM_PLAYERS;
+            if (gameState.turnInRound >= totalTurnsPerRound) {
+                console.log("Round ended. Triggering Energy Surge.");
+                triggerEnergySurge(); // Call the new surge function
+                gameState.turnInRound = 0; // Reset for the next round
+            }
 
             // Switch to next player
             gameState.currentPlayer = 1 - gameState.currentPlayer;
-
-            // Reset turn phase
             gameState.turnPhase = 'selecting';
+            gameState.anchorCell = null;
 
-            // Reset anchor cell
-            gameState.anchorCell = null;  // Add this line!
-
-            // Update UI
-            updatePlayerCards();
-            document.getElementById('gameStatus').textContent = `${gameState.players[gameState.currentPlayer].name}'s turn`;
-
-            // Switch selection mode back to energy
+            updatePlayerCards(); // Update cards AFTER potential surge
+            updateGameStatus(`${gameState.players[gameState.currentPlayer].name}'s turn`);
+            updateSurgeCountdown(); // Update the countdown display
             setSelectionMode('energy');
         }
+
+        // *** NEW FUNCTION: Trigger Energy Surge ***
+        function triggerEnergySurge() {
+            updateGameStatus("Energy Surge!");
+            console.log("--- Triggering Energy Surge ---");
+
+            // Increment the VALUE of each stored charged core for both players
+            gameState.players.forEach((player, index) => {
+                const oldValues = [...player.chargedCores]; // For logging
+                // Use map to create a new array with incremented values
+                player.chargedCores = player.chargedCores.map(coreValue => coreValue + 1);
+                console.log(`Player ${index + 1} cores surged. Values: [${oldValues.join(', ')}] -> [${player.chargedCores.join(', ')}]`);
+            });
+
+            // Visual animation
+            const surgeOverlay = document.getElementById('surgeOverlay');
+            if (surgeOverlay) {
+                surgeOverlay.classList.add('active');
+                setTimeout(() => surgeOverlay.classList.remove('active'), 900);
+            } else {
+                console.warn("Surge overlay element not found!");
+            }
+
+            // Update player cards AFTER the animation starts
+            setTimeout(() => {
+               updatePlayerCards(); // Reflect new values
+               updateGameStatus(`${gameState.players[gameState.currentPlayer].name}'s turn`); // Reset status after surge
+            }, 850);
+        }
+
+
+        // *** NEW FUNCTION: Update Surge Countdown UI ***
+        function updateSurgeCountdown() {
+            const countdownElement = document.getElementById('surgeCountdown');
+            if (countdownElement) {
+                const totalTurnsPerRound = gameState.turnsPerPlayerPerRound * NUM_PLAYERS;
+                const turnsRemaining = totalTurnsPerRound - gameState.turnInRound;
+                countdownElement.textContent = `${turnsRemaining}`;
+            } else {
+                console.warn("Surge countdown element not found!");
+            }
+        }
+
 
         // Check if the game has ended
         function checkGameEnd() {
@@ -2386,7 +2379,10 @@
 
                         // Draw token preview
                         ctx.globalAlpha = 0.7;
-                        drawEnergyToken(centerX, centerY, radius, gameState.currentPlayer);
+                        // Find the corresponding selectedCell data to get the preview value
+                        const selectedData = gameState.selectedCells.find(s => s.x === x && s.y === y);
+                        const previewValue = selectedData ? selectedData.value : 1;
+                        drawEnergyToken(centerX, centerY, radius, gameState.currentPlayer, 0, previewValue, selectedData?.type === 'charged'); // Pass value and type
                         ctx.globalAlpha = 1.0;
                     }
 
@@ -2395,31 +2391,14 @@
                         const tokenParts = cell.token.split('-');
                         const tokenType = tokenParts[0];
                         const player = parseInt(tokenParts[1]);
-
-                        drawEnergyToken(centerX, centerY, radius, player, cell.glow);
-
-                        // Draw token value (if defined)
-                        if (cell.value && cell.value > 1) {
-                            // Add a background for better visibility
-                            ctx.fillStyle = 'rgba(0,0,0,0.6)';
-                            ctx.beginPath();
-                            ctx.arc(centerX + radius * 0.6, centerY - radius * 0.6, radius * 0.3, 0, Math.PI * 2);
-                            ctx.fill();
-
-                            // Draw the value
-                            ctx.font = `bold ${Math.floor(radius * 0.5)}px Arial`;
-                            ctx.fillStyle = 'white';
-                            ctx.textAlign = 'center';
-                            ctx.textBaseline = 'middle';
-                            ctx.fillText(cell.value, centerX + radius * 0.6, centerY - radius * 0.6);
-                        }
-                    }
-                }
+                        // Pass the cell's actual value and type to the drawing function
+                        drawEnergyToken(centerX, centerY, radius, player, cell.glow, cell.value, tokenType === 'charged');
+                    }                }
             }
         }
 
         // Draw an energy token
-        function drawEnergyToken(x, y, radius, player, glow = 0) {
+        function drawEnergyToken(x, y, radius, player, glow = 0, value = 1, isCharged = false) { // Add value and type params
             // Shadow
             ctx.shadowColor = PLAYER_GLOW[player];
             ctx.shadowBlur = 10 + glow * 20;
@@ -2433,20 +2412,28 @@
             ctx.fill();
 
             // Reset shadow
-            ctx.shadowColor = 'transparent';
-            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
 
-            // Inner circle
-            ctx.fillStyle = '#f5f5f5';
-            ctx.beginPath();
-            ctx.arc(x, y, radius * 0.7 * (1 + glow * 0.1), 0, Math.PI * 2);
-            ctx.fill();
-
-            // Player indicator
-            ctx.fillStyle = PLAYER_COLORS[player];
-            ctx.beginPath();
-            ctx.arc(x, y, radius * 0.4 * (1 + glow * 0.2), 0, Math.PI * 2);
-            ctx.fill();
+            // Inner design (different for charged potentially)
+            if (isCharged) { // Maybe a slightly different inner look for charged?
+                ctx.fillStyle = '#dddddd'; // Slightly darker inner for charged
+                ctx.beginPath();
+                ctx.arc(x, y, radius * 0.7 * (1 + glow * 0.1), 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = PLAYER_COLORS[player]; // Player color center dot
+                ctx.beginPath();
+                ctx.arc(x, y, radius * 0.3 * (1 + glow * 0.2), 0, Math.PI * 2);
+                ctx.fill();
+            } else { // Energy core design
+                ctx.fillStyle = '#f5f5f5';
+                ctx.beginPath();
+                ctx.arc(x, y, radius * 0.7 * (1 + glow * 0.1), 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = PLAYER_COLORS[player];
+                ctx.beginPath();
+                ctx.arc(x, y, radius * 0.4 * (1 + glow * 0.2), 0, Math.PI * 2);
+                ctx.fill();
+            }
 
             // Highlight
             ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
@@ -2454,8 +2441,28 @@
             ctx.arc(x - radius * 0.2, y - radius * 0.2, radius * 0.15, 0, Math.PI * 2);
             ctx.fill();
 
-            // Add glow effect
+            // *** Draw Value if > 1 ***
+            if (value > 1) {
+                // Optional background for contrast
+                // ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                // ctx.beginPath();
+                // ctx.arc(x + radius * 0.5, y - radius * 0.5, radius * 0.35, 0, Math.PI * 2);
+                // ctx.fill();
+
+                ctx.font = `bold ${Math.floor(radius * 0.6)}px Arial`; // Make value prominent
+                ctx.fillStyle = 'white'; // White value
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'black'; // Add shadow to value text for contrast
+                ctx.shadowBlur = 2;
+                ctx.fillText(value, x, y); // Center the value on the token
+                ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; // Reset shadow
+            }
+
+
+            // Glow effect
             if (glow > 0) {
+                // ... (glow drawing logic remains the same) ...
                 const glowRadius = radius * (1.2 + glow * 0.5);
                 const gradient = ctx.createRadialGradient(x, y, radius, x, y, glowRadius);
                 gradient.addColorStop(0, PLAYER_GLOW[player]);
@@ -2469,6 +2476,7 @@
                 ctx.globalAlpha = 1.0;
             }
         }
+
 
         // Draw a charged token
         function drawChargedToken(x, y, radius, player, glow = 0) {
@@ -2568,7 +2576,7 @@
             ctx.globalAlpha = 1.0;
         }
 
-        // Draw animations
+        // Draw animations (Remove surge case if using DOM animation)
         function drawAnimations() {
             animations.forEach(anim => {
                 switch (anim.type) {
@@ -2587,9 +2595,14 @@
                     case 'score-update':
                         drawScoreUpdateAnimation(anim);
                         break;
+                    // Remove case 'energy-surge' if using the CSS/DOM approach
+                    // case 'energy-surge':
+                    //     drawEnergySurgeAnimation(anim); // Keep if you implement a canvas-based surge animation
+                    //     break;
                 }
             });
         }
+
 
         // Draw score update animation
         function drawScoreUpdateAnimation(anim) {
