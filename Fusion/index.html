@@ -1001,7 +1001,7 @@
 
         // 3a. Deselect Cell
         function deselectCell(x, y, cell) {
-            console.log("[DEBUG - CLICK] Deselecting cell");
+            console.log("[DEBUG - CLICK] Deselecting cell at (" + x + ", " + y + ")");
 
             // Find the cell in selectedCells
             const index = gameState.selectedCells.findIndex(
@@ -1009,29 +1009,85 @@
             );
 
             if (index !== -1) {
-                const deselectedCell = gameState.selectedCells[index];
-                console.log(`[DEBUG - CLICK] Found cell to deselect at index ${index}, type: ${deselectedCell.type}`);
+                const deselectedCellInfo = gameState.selectedCells[index];
+                console.log(`[DEBUG - CLICK] Found cell to deselect at index ${index}, type: ${deselectedCellInfo.type}`);
 
-                // Only modify charged count if deselecting a charged core
-                if (deselectedCell.type === 'charged') {
+                // *** CORE FIX START ***
+                // Check if the deselected core is the 'energy' (anchor) core
+                if (deselectedCellInfo.type === 'energy') {
+                    console.log("[DEBUG - CLICK] Anchor/Energy core deselected. Resetting all turn selections.");
+
+                    // 1. Refund all charged cores selected *this turn*
+                    let refundedChargedCores = 0;
+                    gameState.selectedCells.forEach(selected => {
+                        if (selected.type === 'charged') {
+                            refundedChargedCores++;
+                        }
+                        // 2. Visually deselect all grid cells that were part of this turn's selection
+                        try {
+                        gameState.grid[selected.y][selected.x].selected = false;
+                        } catch(e){
+                            console.warn(`Error visually deselecting ${selected.x},${selected.y}: ${e.message}`);
+                        }
+                    });
+
+                    if (refundedChargedCores > 0) {
+                        const oldCount = gameState.players[gameState.currentPlayer].chargedTokens;
+                        gameState.players[gameState.currentPlayer].chargedTokens += refundedChargedCores;
+                        console.log(`[DEBUG - CLICK] Returned ${refundedChargedCores} charged cores due to anchor deselect. Player ${gameState.currentPlayer + 1} count: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedTokens}`);
+                        updatePlayerCards(); // Update UI immediately
+                    }
+
+                    // 3. Clear the entire selectedCells array for the turn
+                    gameState.selectedCells = [];
+                    console.log("[DEBUG - CLICK] selectedCells array cleared.");
+
+                    // 4. Reset the energy token placement flag
+                    gameState.placedEnergyToken = false;
+                    console.log("[DEBUG - CLICK] placedEnergyToken reset to false.");
+
+                    // 5. Reset the anchor cell
+                    gameState.anchorCell = null;
+                    console.log("[DEBUG - CLICK] anchorCell reset to null.");
+
+                    updateGameStatus("Selection cleared. Place energy core first.");
+
+
+                } else {
+                    // Deselecting a 'charged' core (original logic is mostly fine for this case)
+                    console.log("[DEBUG - CLICK] Deselecting a charged core.");
                     const oldCount = gameState.players[gameState.currentPlayer].chargedTokens;
                     // Return the charged core to the player's count
                     gameState.players[gameState.currentPlayer].chargedTokens++;
-                    console.log(`[DEBUG - CLICK] Returned charged core to player ${gameState.currentPlayer + 1}, count: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedTokens}`);
-                    updatePlayerCards();
-                } else if (deselectedCell.type === 'energy') {
-                    // If deselecting energy core, update the flag
-                    gameState.placedEnergyToken = false;
-                    console.log("[DEBUG - CLICK] Energy token deselected, placedEnergyToken set to false");
-                }
+                    console.log(`[DEBUG - CLICK] Returned 1 charged core. Player ${gameState.currentPlayer + 1} count: ${oldCount} -> ${gameState.players[gameState.currentPlayer].chargedTokens}`);
+                    updatePlayerCards(); // Update UI immediately
 
-                // Remove from selectedCells
-                gameState.selectedCells.splice(index, 1);
-                console.log("[DEBUG - CLICK] Cell removed from selectedCells, new count:", gameState.selectedCells.length);
+                    // Remove just this one cell from selectedCells
+                    gameState.selectedCells.splice(index, 1);
+                    console.log("[DEBUG - CLICK] Cell removed from selectedCells, new count:", gameState.selectedCells.length);
+
+                    // Visually deselect only this grid cell
+                    cell.selected = false;
+                    updateGameStatus("Charged core deselected.");
+
+                    // If this was the last selected cell, reset the anchor just in case
+                    // (Though this shouldn't happen if energy was placed first)
+                    if (gameState.selectedCells.length === 0) {
+                    console.log("[DEBUG - CLICK] Last selected cell deselected, ensuring anchor/energy flags are reset.");
+                    gameState.placedEnergyToken = false; // Should already be false if only energy was selected then deselected
+                    gameState.anchorCell = null;
+                    }
+                }
+                // *** CORE FIX END ***
+
+            } else {
+                console.warn(`[DEBUG - CLICK] Could not find cell (${x}, ${y}) in selectedCells array to deselect.`);
+                // Attempt to visually deselect anyway, just in case state is inconsistent
+                cell.selected = false;
             }
 
-            // Deselect the cell
-            cell.selected = false;
+            // Force re-render after any deselection
+            render();
         }
 
         // 3b. Select Cell
